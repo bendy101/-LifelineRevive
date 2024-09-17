@@ -181,7 +181,7 @@ if (isServer) then {
 
 				// add Damage Handler for non-ace version
 				if (Lifeline_RevMethod == 2) then {  
-					[_x] execvm "Lifeline_Revive\scripts\non_ace\Lifeline_DamageHandler";
+					[_x] execvm "Lifeline_Revive\scripts\non_ace\Lifeline_DamageHandler.sqf";
 				}; 
 
 				// add groups 
