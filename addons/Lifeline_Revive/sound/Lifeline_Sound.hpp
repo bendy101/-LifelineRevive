@@ -1,3 +1,59 @@
+	//DEBUG
+	class crawling {
+		name="crawling";
+		sound[]={"Lifeline_Revive\sound\crawling.ogg", 20, 1, 50};
+		titles[] = {};
+	};
+
+	class bepatient {
+		name="bepatient";
+		sound[]={"Lifeline_Revive\sound\bepatient.ogg", 20, 1, 50};
+		titles[] = {};
+	};
+	class medicsbusy {
+		name="medicsbusy";
+		sound[]={"Lifeline_Revive\sound\medicsbusy.ogg", 20, 1, 50};
+		titles[] = {};
+	};
+	class stopvehicle {
+		name="stopvehicle";
+		sound[]={"Lifeline_Revive\sound\stopvehicle.ogg", 20, 1, 50};
+		titles[] = {};
+	};
+	class ontheway {
+		name="ontheway";
+		sound[]={"Lifeline_Revive\sound\ontheway.ogg", 20, 1, 50};
+		titles[] = {};
+	};
+	class memberdied {
+		name="memberdied";
+		sound[]={"Lifeline_Revive\sound\memberdied.ogg", 1, 1, 50};
+		titles[] = {};
+	};
+	class diedbleedout1 {
+		name="diedbleedout1";
+		sound[]={"Lifeline_Revive\sound\diedbleedout1.ogg", 10, 1, 50};
+		titles[] = {};
+	};	
+	class beep_hi_1 {
+			name="beep_hi_1";
+			sound[]={"Lifeline_Revive\sound\Beep Standard Hi.ogg", 10, 1, 50};
+			titles[] = {};
+	};
+	class siren1 {
+		name="siren1";
+		sound[]={"Lifeline_Revive\sound\Siren_Long.ogg", 20, 1, 50};
+		titles[] = {};
+	};	
+	class siren2 {
+		name="siren2";
+		sound[]={"Lifeline_Revive\sound\Siren_Long2.ogg", 20, 1, 50};
+		titles[] = {};
+	};	
+	
+	//ENDDEBUG	
+		
+		
 //===================== Dave		
 
 	class Dave_leftleg1 {
@@ -2537,3 +2593,143 @@
 		};	
 
 
+	//DEBUG
+
+	/// TEST SOUNDS
+		
+		
+	class testA {
+			name="testA";
+			sound[]={"Lifeline_Revive\sound\testA.ogg", 10, 1, 50};
+			titles[] = {};
+		};		
+	class testA2 {
+			name="testA2";
+			sound[]={"Lifeline_Revive\sound\testA2.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class testB {
+			name="testB";
+			sound[]={"Lifeline_Revive\sound\testB.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class testC {
+			name="testC";
+			sound[]={"Lifeline_Revive\sound\testC.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+
+		
+		// ================= TEMP TEST SOUNDS =================
+	class memberdied1 {
+			name="memberdied1";
+			sound[]={"Lifeline_Revive\sound\memberdied1.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class memberdied2 {
+			name="memberdied2";
+			sound[]={"Lifeline_Revive\sound\memberdied2.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class memberdied3 {
+			name="memberdied3";
+			sound[]={"Lifeline_Revive\sound\memberdied3.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class memberdied4 {
+			name="memberdied4";
+			sound[]={"Lifeline_Revive\sound\memberdied4.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class memberdied5 {
+			name="memberdied5";
+			sound[]={"Lifeline_Revive\sound\memberdied5.ogg", 10, 1, 50};
+			titles[] = {};
+		};
+
+		
+		
+	class Zeusorthirdparty {
+		name="Zeusorthirdparty";
+		sound[]={"Lifeline_Revive\sound\errormessages\Zeusorthirdparty.ogg", 10, 1, 50};
+		titles[] = {};
+	};	
+	class LifelineBleedOutTime_not_zero {
+			name="LifelineBleedOutTime_not_zero";
+			sound[]={"Lifeline_Revive\sound\errormessages\LifelineBleedOutTime_not_zero.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class invincible_or_captive {
+			name="invincible_or_captive";
+			sound[]={"Lifeline_Revive\sound\errormessages\invincible_or_captive.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class overtheshold {
+			name="overtheshold";
+			sound[]={"Lifeline_Revive\sound\errormessages\overtheshold.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class Lifeline_downequalstrue {
+			name="Lifeline_downequalstrue";
+			sound[]={"Lifeline_Revive\sound\errormessages\Lifeline_downequalstrue.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class stop_idle_medic {
+			name="stop_idle_medic";
+			sound[]={"Lifeline_Revive\sound\errormessages\stop_idle_medic.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class unconsciouswithouthandler {
+			name="unconsciouswithouthandler";
+			sound[]={"Lifeline_Revive\sound\errormessages\unconsciouswithouthandler.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class reviveinprogresserror {
+			name="reviveinprogresserror";
+			sound[]={"Lifeline_Revive\sound\errormessages\reviveinprogresserror.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class medichaslauncher {
+			name="medichaslauncher";
+			sound[]={"Lifeline_Revive\sound\errormessages\medichaslauncher.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class revivetimeminus {
+			name="revivetimeminus";
+			sound[]={"Lifeline_Revive\sound\errormessages\revivetimeminus.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class terminatespawncycle {
+			name="terminatespawncycle";
+			sound[]={"Lifeline_Revive\sound\errormessages\terminatespawncycle.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class exitrevivetravel {
+			name="exitrevivetravel";
+			sound[]={"Lifeline_Revive\sound\errormessages\exitrevivetravel.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class closermedic {
+			name="closermedic";
+			sound[]={"Lifeline_Revive\sound\errormessages\closermedic.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class multiplemedics {
+			name="multiplemedics";
+			sound[]={"Lifeline_Revive\sound\errormessages\multiplemedics.ogg", 10, 1, 50};
+			titles[] = {};
+		};	
+	class BeepStandardLo {
+			name="BeepStandardLo";
+			sound[]={"Lifeline_Revive\sound\errormessages\Beep Standard Lo.ogg", 10, 1, 50};
+			titles[] = {};
+		};		
+		
+	class hackfix {
+			name="hackfix";
+			sound[]={"Lifeline_Revive\sound\errormessages\hackfix2.ogg", 10, 1, 50};
+			titles[] = {};
+	};	
+		
+	//ENDDEBUG
+		

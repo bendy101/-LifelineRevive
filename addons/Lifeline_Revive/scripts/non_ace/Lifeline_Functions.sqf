@@ -655,7 +655,8 @@ Lifeline_Medic_Anim_and_Revive = {
 						while {_count > 0} do {
 						_incap setVariable [_pairtimebaby, (_incap getvariable _pairtimebaby) + 1, true]; // add 5 seconds to incap revivetimer
 						_medic setVariable [_pairtimebaby, (_medic getvariable _pairtimebaby) + 1, true]; // add 5 seconds to medic revivetimer
-						_incap setVariable [_bleedoutbaby, (_incap getvariable _bleedoutbaby) + 1, true];						_bandages = _incap getVariable ["num_bandages",0];
+						_incap setVariable [_bleedoutbaby, (_incap getvariable _bleedoutbaby) + 1, true];						
+						_bandages = _incap getVariable ["num_bandages",0];
 						if (_bandages != 0 ) exitWith {};
 						_count =  _count - 1;
 						sleep 1;
@@ -828,7 +829,7 @@ Lifeline_Medic_Anim_and_Revive = {
 								// Kneeling revive - no near enemy
 								// if (isNull _EnemyCloseBy) then {
 								if (lifestate _incap == "INCAPACITATED" && isNull _EnemyCloseBy && lifestate _medic != "INCAPACITATED" && alive _medic) then {
-									_medic setdir (_medic getDir _incap)+5;/* 
+									_medic setdir (_medic getDir _incap)+5;
 									if (_crouchreviveanim == 0) then {
 										 // [_medic, "AinvPknlMstpSnonWnonDnon_medic4"] remoteExec ["playMoveNow", _medic];
 										 [_medic, "AinvPknlMstpSnonWnonDnon_medic4"] remoteExec ["playMoveNow", _medic, true];
