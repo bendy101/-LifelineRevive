@@ -1,3 +1,10 @@
+diag_log "                                                                                                '"; 
+diag_log "                                                                                                '"; 
+diag_log "============================================================================================================='"; 
+diag_log "============================================================================================================='"; 
+diag_log "========================================= Lifeline_Functions.sqf ============================================'"; 
+diag_log "============================================================================================================='"; 
+diag_log "============================================================================================================='"; 
 
 //================================================================================
 //==== WHEN UNIT INCAPACITATED
@@ -655,7 +662,7 @@ Lifeline_Medic_Anim_and_Revive = {
 						while {_count > 0} do {
 						_incap setVariable [_pairtimebaby, (_incap getvariable _pairtimebaby) + 1, true]; // add 5 seconds to incap revivetimer
 						_medic setVariable [_pairtimebaby, (_medic getvariable _pairtimebaby) + 1, true]; // add 5 seconds to medic revivetimer
-						_incap setVariable [_bleedoutbaby, (_incap getvariable _bleedoutbaby) + 1, true];						
+						_incap setVariable [_bleedoutbaby, (_incap getvariable _bleedoutbaby) + 1, true];  
 						_bandages = _incap getVariable ["num_bandages",0];
 						if (_bandages != 0 ) exitWith {};
 						_count =  _count - 1;
@@ -829,7 +836,7 @@ Lifeline_Medic_Anim_and_Revive = {
 								// Kneeling revive - no near enemy
 								// if (isNull _EnemyCloseBy) then {
 								if (lifestate _incap == "INCAPACITATED" && isNull _EnemyCloseBy && lifestate _medic != "INCAPACITATED" && alive _medic) then {
-									_medic setdir (_medic getDir _incap)+5;
+									_medic setdir (_medic getDir _incap)+5;/*  */
 									if (_crouchreviveanim == 0) then {
 										 // [_medic, "AinvPknlMstpSnonWnonDnon_medic4"] remoteExec ["playMoveNow", _medic];
 										 [_medic, "AinvPknlMstpSnonWnonDnon_medic4"] remoteExec ["playMoveNow", _medic, true];
@@ -864,7 +871,7 @@ Lifeline_Medic_Anim_and_Revive = {
 										if (Lifeline_Anim_Method == 1) then {
 											if (_firstimetrigg == false ) then {
 												_randomanimloop = selectrandom[1,2,3,4];
-												_randomanimloop = 1;
+												// _randomanimloop = 1;
 												//remote exec the function with the bandage animation loop
 												// [_incap,_medic,_randomanimloop,_cprcheck] remoteExec ["Lifeline_Anim_Bandage_new",0,true];
 												[_incap,_medic,_randomanimloop,_cprcheck] remoteExec ["Lifeline_Anim_Bandage_new",[_incap,_medic],true];

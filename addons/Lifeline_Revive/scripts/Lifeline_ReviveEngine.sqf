@@ -225,7 +225,7 @@ if (isServer) then {
 
 	}; // end Lifeline_DH_update
 
-	[] call Lifeline_DH_update;  
+	[] call Lifeline_DH_update; 
 
 
 	/* 

@@ -1,3 +1,4 @@
+Lifeline_Version = "Lifeline Revive AI";
 diag_log "                                                                                 				               "; 
 diag_log "                                                                                  			               "; 
 diag_log "                                                                                    			               "; 
@@ -8,7 +9,7 @@ diag_log "==================================================== MOD =============
 diag_log "============================================== XEH_preInit.sqf =============================================='";
 diag_log "============================================================================================================='";
 diag_log "============================================================================================================='";
-
+diag_log Lifeline_Version;
 
 
 // check for ACE medical
@@ -39,7 +40,7 @@ diag_log format ["xxxxxxxxxxxxxx XEH_preInit.sqf testicles %1", testicles];
 
 
 
-["Lifeline_revive_enable", "CHECKBOX", ["ENABLE MOD", "On or Off.\n\n"], "Lifeline Revive", true,true] call CBA_fnc_addSetting;
+["Lifeline_revive_enable", "CHECKBOX", ["ENABLE "+Lifeline_Version, "On or Off.\n\n"], "Lifeline Revive", true,true] call CBA_fnc_addSetting;
 
 
 // ["Lifeline_Scope_CBA", "LIST",     ["Scope", "Scope of mod"], "Lifeline Revive", [[1, 2, 3, 4], ["Player Group incl players","Player Side incl players", "Player Side excl players", "Choose in Game"], 2]] call CBA_fnc_addSetting;
@@ -67,7 +68,7 @@ if (Lifeline_ACEcheck_ == false) then {
 	// ["Lifeline_autoRecover", "CHECKBOX", ["Auto Recover", "Should INCAPACITATED unit be auto revived after the above time elapses?"], ["Lifeline Revive","_MAIN"], false] call CBA_fnc_addSetting;
 	["Lifeline_autoRecover", "SLIDER",   ["Auto Recover",   "Percentage chance of regaining consciousness\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .3, 0, true],true,{Lifeline_autoRecover = round (Lifeline_autoRecover * 100)}] call CBA_fnc_addSetting;
 	["Lifeline_CPR_likelihood", "SLIDER",   ["Likelihood of needing CPR",   "If damage over CPR threshold, how likley?\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .9, 0, true],true,{Lifeline_cpr_likelihood = round (Lifeline_cpr_likelihood * 100)}] call CBA_fnc_addSetting;
-	["Lifeline_CPR_less_bleedouttime", "SLIDER",   ["Reduce Bleedout Time Cardiac Arrest",   "If heart is stopped and need CPR, then bleedout time is reduced.\nPercentage of Bleedout time set above.\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .3, 0, true],true,{Lifeline_CPR_less_bleedouttime = round (Lifeline_CPR_less_bleedouttime * 100)}] call CBA_fnc_addSetting;
+	["Lifeline_CPR_less_bleedouttime", "SLIDER",   ["Reduce Bleedout Time Cardiac Arrest",   "If heart is stopped and need CPR, then bleedout time is reduced.\nPercentage of Bleedout time set above.\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .6, 0, true],true,{Lifeline_CPR_less_bleedouttime = round (Lifeline_CPR_less_bleedouttime * 100)}] call CBA_fnc_addSetting;
 	["Lifeline_IncapThres", "SLIDER",   ["Incap Theshold",   "Damage level to trigger incapacitated. Default 0.7\n\n"], "Lifeline Revive Advanced", [0.5, 0.8, 0.7, 1],true,{Lifeline_IncapThres = (round(Lifeline_IncapThres * 10)/10)}] call CBA_fnc_addSetting;
 };
 
@@ -81,8 +82,8 @@ if (Lifeline_ACEcheck_ == false) then {
 ["Lifeline_Voices", "LIST",     ["Voice Accents",  "Commonwealth (British + Australian) or USA\n\n"], ["Lifeline Revive","SOUND"], [[1,2,3], ["All","British Empire", "USA"], 0],true] call CBA_fnc_addSetting;
 ["Lifeline_Idle_Medic_Stop", "CHECKBOX", ["6 second limit on idle medics", "Sometime AI in Arma is retarded. This stops them being idle after 6 seconds\n\n"], "Lifeline Revive Advanced", false,true] call CBA_fnc_addSetting;
 ["Lifeline_AI_skill", "SLIDER",   ["AI Skill",   "AI skill level. The skill level of AI in your squad or side.\n0 means ignore & use mission setting.\n\n"], "Lifeline Revive Advanced", [0, 1, 0, 1],true,{Lifeline_AI_skill = (round(Lifeline_AI_skill * 10)/10)}] call CBA_fnc_addSetting;
-["Lifeline_Anim_Method", "LIST",     ["Animation method - old or new.", "Old: Smoother animation but busier with the weapon always pulled out between bandages, and takes longer to revive.
-New method: no weapon pulled out between bandages - but due to arma bugs - there is a small animation glitch in the loop (frame jump)\n\n"], ["Lifeline Revive Advanced"], [[0, 1], ["Old Method","New Method"], 0],true] call CBA_fnc_addSetting;
+["Lifeline_Anim_Method", "LIST",     ["Prone animation method", "Old: Smoother animation but busier with the weapon always pulled out between bandages, and takes longer to revive.
+New method: no weapon pulled out between bandages - but due to arma bugs - there is a small animation glitch in the loop (frame jump)\n\n"], ["Lifeline Revive Advanced"], [[0, 1], ["Old Method","New Method"], 1],true] call CBA_fnc_addSetting;
 
 
 
@@ -123,34 +124,34 @@ if (Lifeline_ACEcheck_ == false) then {["Lifeline_cntdwn_disply", "SLIDER",   ["
 
 ["Lifeline_HUD_medical", "CHECKBOX", ["Medic Action Hint", "Show which medic action is happening.\ne.g. CPR, blood IV, morphine, body part bandage and number of bandages\n\n"], ["Lifeline Revive","HUD & MAP"], false,true] call CBA_fnc_addSetting;
 // ["Lifeline_HUD_names", "CHECKBOX", ["HUD list of incapped units and medics", "Just show names of who is being revived\n\n"], ["Lifeline Revive","HUD & MAP"], false,true] call CBA_fnc_addSetting;
-["Lifeline_HUD_names", "LIST",     ["HUD list of incapped units and medics", 
+["Lifeline_HUD_names", "LIST",     ["Realtime list of units", 
 "0. Off
 1. On.
 2. With distance & bandages
 3. With only distance
-4. With only bandages \n\n"], ["Lifeline Revive","HUD & MAP"], [[0, 1, 2, 3, 4], ["Off","On", "On with distance & bandages", "On with only distance", "On with only bandages"], 2],true] call CBA_fnc_addSetting;
+4. With only bandages \n\n"], ["Lifeline Revive","HUD & MAP"], [[0, 1, 2, 3, 4], ["Off","On", "On with distance & bandages", "On with only distance", "On with only bandages"], 0],true] call CBA_fnc_addSetting;
 
 ["Lifeline_Map_mark", "CHECKBOX", ["Show markers on map", "Incapacitated and dead shown on map\n\n"], ["Lifeline Revive","HUD & MAP"], false,true] call CBA_fnc_addSetting;
 
-["Lifeline_Revive_debug", "CHECKBOX", ["Debug", "Debug"], ["Lifeline Revive Advanced","DEBUG"], false,true] call CBA_fnc_addSetting;
+["Lifeline_Revive_debug", "CHECKBOX", ["Debug On", "Debug On. Settings below only work if this is on"], ["Lifeline Revive Advanced","DEBUG"], false,true] call CBA_fnc_addSetting;
 // ["Lifeline_Fatigue", "CHECKBOX", ["Fatigue", "Fatigue"], "Lifeline Revive Advanced", true,true] call CBA_fnc_addSetting;
 ["Lifeline_Fatigue", "LIST",     ["Fatigue",  "Force Fatigue Settings."], ["Lifeline Revive","~BONUS. Unrelated to revive but useful"], [[0,1,2], ["Mission Settings","Enabled", "Disabled"], 0],true] call CBA_fnc_addSetting;
 
 ["Lifeline_Hotwire", "CHECKBOX", ["Hotwire Locked Vehicles with Toolkit", "Vehicles you cannot access can now be unlocked.\nHotwire them with toolkit.\nIf the vehicle is enclosed, then you need to break in first.\nDoes not apply to armoured units.\n\n"], ["Lifeline Revive","~BONUS. Unrelated to revive but useful"], true,true] call CBA_fnc_addSetting;
 ["Lifeline_ExplSpec", "CHECKBOX", ["Make all your units Explosive Specialists", "It is frustrating when you accidently plant a bomb then cannot undo it.\nThis fixes that.\n\n"], ["Lifeline Revive","~BONUS. Unrelated to revive but useful"], true,true] call CBA_fnc_addSetting;
 
-["Lifeline_HUD_dist_font", "LIST",     ["Font for distance hint",  "Font for distance hint"], ["Lifeline Revive Advanced","DEBUG temporary testing"], [[0,1,2,3,4,5,6,7,8,9,10,11,12], ["EtelkaMonospacePro","EtelkaMonospaceProBold","EtelkaNarrowMediumPro","LCD14","LucidaConsoleB","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight","TahomaB"], 6],true] call CBA_fnc_addSetting;
+["Lifeline_HUD_dist_font", "LIST",     ["Font for distance hint",  "Font for distance hint"], ["Lifeline Revive Advanced","DEBUG temporary test"], [[0,1,2,3,4,5,6,7,8,9,10,11,12], ["EtelkaMonospacePro","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight"], 0],true] call CBA_fnc_addSetting;
 
-["Lifeline_yellowmarker", "CHECKBOX", ["in debug mode, have yellow marker on incap.", "in debug mode, have yellow marker on incap."], ["Lifeline Revive Advanced","DEBUG temporary testing"], false,true] call CBA_fnc_addSetting;
+["Lifeline_yellowmarker", "CHECKBOX", ["Yellow marker on incap.", "in debug mode, have yellow marker on incap"], ["Lifeline Revive Advanced","DEBUG"], false,true] call CBA_fnc_addSetting;
 
-["Lifeline_remove_3rd_pty_revive", "CHECKBOX", ["Remove Other Revive Systems Before Mission", "Uncheck this if you want the choice of cancelling Lifeline Revive in the mission."], ["Lifeline Revive Advanced","DEBUG temporary testing"], true,true] call CBA_fnc_addSetting;
-["Lifeline_hintsilent", "CHECKBOX", ["Debug Hints", "Debug Hints. Using BI 'hinstsilent'"], ["Lifeline Revive Advanced","DEBUG temporary testing"], true,true] call CBA_fnc_addSetting;
-["Lifeline_debug_soundalert", "CHECKBOX", ["Debug Sound Alerts", "Sound Alerts when there is a bug."], ["Lifeline Revive Advanced","DEBUG temporary testing"], true,true] call CBA_fnc_addSetting;
+["Lifeline_remove_3rd_pty_revive", "CHECKBOX", ["Remove Other Revive Systems Before Mission", "Uncheck this if you want the choice of cancelling Lifeline Revive in the mission.\nNot the best method however, its better to disable mod.\n Do this by unchecking setting 'ENABLE Lifeline Revive' and restarting mission"], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
+["Lifeline_hintsilent", "CHECKBOX", ["Debug Hints", "Debug Hints. Using BI 'hinstsilent'"], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
+["Lifeline_debug_soundalert", "CHECKBOX", ["Error Sound Alerts", "Sound Alerts when there is a bug."], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
 ["Lifeline_HUD_names_pairtime", "CHECKBOX", ["incl. pair time for HUD list of units", "incl time for pairs in HUD list of incapped units and medics"], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
 
 
 // ["Lifeline_DEH_CallMethod", "LIST",     ["How to remoteexec the DEH",  "Jaaa\n\n"], ["Lifeline Revive Advanced","DEBUG temporary testing"], [[1,2,3,4], ["remoteexec ['addeventhandler', _x] (Default)","remoteExec ['call'] curley brackets {}", "remoteExec FNC ['Lifeline_custom_DamageH'", "remoteExec CALL FNC ['Lifeline_custom_DamageH'" ], 0],true] call CBA_fnc_addSetting;
-["Lifeline_DEH_CallMethod", "LIST",     ["How to remoteexec the DEH",  "Jaaa\n\n"], ["Lifeline Revive Advanced","DEBUG temporary testing"], [[1,2,3,4], ["Lifeline_DamageHandler.sqf (Default)","Lifeline_DamageHandlerREMOTECALL.sqf", "remoteExec FNC ['Lifeline_custom_DamageH'", "remoteExec 'call' FNC ['Lifeline_custom_DamageH'" ], 0],true] call CBA_fnc_addSetting;
+// ["Lifeline_DEH_CallMethod", "LIST",     ["How to remoteexec the DEH",  "Jaaa\n\n"], ["Lifeline Revive Advanced","DEBUG temporary testing"], [[1,2,3,4], ["Lifeline_DamageHandler.sqf (Default)","Lifeline_DamageHandlerREMOTECALL.sqf", "remoteExec FNC ['Lifeline_custom_DamageH'", "remoteExec 'call' FNC ['Lifeline_custom_DamageH'" ], 0],true] call CBA_fnc_addSetting;
 
 
 

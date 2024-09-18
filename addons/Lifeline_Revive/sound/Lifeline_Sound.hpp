@@ -1,4 +1,4 @@
-	//DEBUG
+
 	class crawling {
 		name="crawling";
 		sound[]={"Lifeline_Revive\sound\crawling.ogg", 20, 1, 50};
@@ -50,10 +50,7 @@
 		sound[]={"Lifeline_Revive\sound\Siren_Long2.ogg", 20, 1, 50};
 		titles[] = {};
 	};	
-	
-	//ENDDEBUG	
-		
-		
+
 //===================== Dave		
 
 	class Dave_leftleg1 {
@@ -2593,11 +2590,8 @@
 		};	
 
 
-	//DEBUG
 
 	/// TEST SOUNDS
-		
-		
 	class testA {
 			name="testA";
 			sound[]={"Lifeline_Revive\sound\testA.ogg", 10, 1, 50};
@@ -2619,7 +2613,6 @@
 			titles[] = {};
 		};	
 
-		
 		// ================= TEMP TEST SOUNDS =================
 	class memberdied1 {
 			name="memberdied1";
@@ -2647,8 +2640,6 @@
 			titles[] = {};
 		};
 
-		
-		
 	class Zeusorthirdparty {
 		name="Zeusorthirdparty";
 		sound[]={"Lifeline_Revive\sound\errormessages\Zeusorthirdparty.ogg", 10, 1, 50};
@@ -2724,12 +2715,9 @@
 			sound[]={"Lifeline_Revive\sound\errormessages\Beep Standard Lo.ogg", 10, 1, 50};
 			titles[] = {};
 		};		
-		
 	class hackfix {
 			name="hackfix";
 			sound[]={"Lifeline_Revive\sound\errormessages\hackfix2.ogg", 10, 1, 50};
 			titles[] = {};
 	};	
-		
-	//ENDDEBUG
-		
+

@@ -1,3 +1,10 @@
+diag_log "                                                                                                '"; 
+diag_log "                                                                                                '"; 
+diag_log "============================================================================================================='"; 
+diag_log "============================================================================================================='"; 
+diag_log "====================================== fix_other_revive_systems.sqf ========================================='"; 
+diag_log "============================================================================================================='"; 
+diag_log "============================================================================================================='"; 
 
 [] execvm "Lifeline_Revive\scripts\Lifeline_Debugging.sqf"; 
 
@@ -26,14 +33,20 @@ Lifeline_display_textright2 = {
 waitUntil {time > 0}; //pause until game started
 
 
-diag_log "===============================START fix_other_revive_systems.sqf===========================";
+
+
+
+
+
 if (isNil "oldACE") then {
-		diag_log  "fix_other_revive_systems.sqf kkkkkkkkkkkkkkkkkkkkkkkkkkkk NO ACE  kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" ;
 		Lifeline_ACEcheck_ = false;
 	} else {
-		diag_log format ["fix_other_revive_systems.sqf kkkkkkkkkkkkkkkkkkkkkkkkkkkk ACE var = %1 kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk", oldACE]; 
 		Lifeline_ACEcheck_ = true;
 };
+
+
+
+
 
 
 // attempt to remove 3rd part revives AFTER mission load. This method not recomended, use CBA setting to do this before mission for more thourough method.
