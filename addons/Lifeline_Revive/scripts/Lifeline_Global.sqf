@@ -114,7 +114,7 @@ Lifeline_countdown_timer2 = {
 	_realseconds = round(_bleedout - time); // to adjust exactly	
 	_counter = _realseconds;
 	_colour = "#FFFAF8";	
-	_font = Lifelinefonts select Lifeline_HUD_dist_font;//added for distance
+	// _font = Lifelinefonts select Lifeline_HUD_dist_font;//added for distance
 
 	while {_counter >= 0 && lifeState _unit == "INCAPACITATED"} do {
 
@@ -139,7 +139,8 @@ Lifeline_countdown_timer2 = {
 				_medic = _AssignedMedic select 0;
 				_distcalc = _medic distance2D _incap;
 				if (isPlayer _incap && _distcalc > 10) then {
-					[format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",_font],((safeZoneW - 1) * 0.48),1.26,3,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
+					// [format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",_font],((safeZoneW - 1) * 0.48),1.26,3,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
+					[format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",Lifeline_HUD_dist_font],((safeZoneW - 1) * 0.48),1.26,3,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
 					// [format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",_font],((safeZoneW - 1) * 0.48),1.26,5,0,0,LifelineDistLayer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
 				};
 				if (isPlayer _incap && (_distcalc <= 10 && _distcalc >= 5 ) && Lifeline_HUD_distance) then {

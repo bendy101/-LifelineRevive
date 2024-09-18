@@ -44,7 +44,7 @@ diag_log format ["xxxxxxxxxxxxxx XEH_preInit.sqf testicles %1", testicles];
 
 
 // ["Lifeline_Scope_CBA", "LIST",     ["Scope", "Scope of mod"], "Lifeline Revive", [[1, 2, 3, 4], ["Player Group incl players","Player Side incl players", "Player Side excl players", "Choose in Game"], 2]] call CBA_fnc_addSetting;
-["Lifeline_Scope_CBA", "LIST",     ["Scope", "Scope of mod. Which units will Lifeline Revive affect?\n\n"], ["Lifeline Revive","_MAIN"], [[1, 2, 3, 4], ["Group","Side", "Side: Playable Slots Only", "Choose in Mission"], 3],true] call CBA_fnc_addSetting;
+["Lifeline_Scope_CBA", "LIST",     ["Scope", "Scope of mod. Which units will Lifeline Revive affect?\nOption 3, 'Playable Slots' is only for Multiplayer\nso it reverts to 'Side' for SinglePlayer\n\n"], ["Lifeline Revive","_MAIN"], [[1, 2, 3, 4], ["Group","Side", "Side Playable Slots (only MP)", "Choose in Mission"], 3],true] call CBA_fnc_addSetting;
 // ["Lifeline_Scope_CBA", "LIST",     ["Scope", "Scope of mod"], "Lifeline Revive", [[1, 2, 3], ["Player Group incl players","Player Side incl players", "Player Side excl players"], 2]] call CBA_fnc_addSetting;
 // if (Lifeline_ACEcheck_ == false) then {["Lifeline_RevMethod", "LIST",     ["Revive Method",     "1. Lifeline Revive Original: revive takes 6 seconds.\n2. Lifeline Custom: number of bandages depends on damage.\n\n"], ["Lifeline Revive","_MAIN"], [[1, 2], ["Lifeline Revive Original","Lifeline Custom"], 0],true] call CBA_fnc_addSetting};
 ["Lifeline_RevProtect", "LIST",     ["Shield while reviving",     "Protection during revive process. 3 levels.
@@ -67,8 +67,9 @@ if (Lifeline_ACEcheck_ == false) then {
 	["Lifeline_BleedOutTime", "SLIDER",   ["Bleedout Time",   "Select how long an INCAPACITATED unit can survive in state before dying or autorevive\n\n"], ["Lifeline Revive","_MAIN"], [0, 600, 300, 0],true,{Lifeline_BleedOutTime = round Lifeline_BleedOutTime}] call CBA_fnc_addSetting;
 	// ["Lifeline_autoRecover", "CHECKBOX", ["Auto Recover", "Should INCAPACITATED unit be auto revived after the above time elapses?"], ["Lifeline Revive","_MAIN"], false] call CBA_fnc_addSetting;
 	["Lifeline_autoRecover", "SLIDER",   ["Auto Recover",   "Percentage chance of regaining consciousness\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .3, 0, true],true,{Lifeline_autoRecover = round (Lifeline_autoRecover * 100)}] call CBA_fnc_addSetting;
-	["Lifeline_CPR_likelihood", "SLIDER",   ["Likelihood of needing CPR",   "If damage over CPR threshold, how likley?\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .9, 0, true],true,{Lifeline_cpr_likelihood = round (Lifeline_cpr_likelihood * 100)}] call CBA_fnc_addSetting;
-	["Lifeline_CPR_less_bleedouttime", "SLIDER",   ["Reduce Bleedout Time Cardiac Arrest",   "If heart is stopped and need CPR, then bleedout time is reduced.\nPercentage of Bleedout time set above.\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .6, 0, true],true,{Lifeline_CPR_less_bleedouttime = round (Lifeline_CPR_less_bleedouttime * 100)}] call CBA_fnc_addSetting;
+	// ["Lifeline_CPR_likelihood", "SLIDER",   ["Likelihood of needing CPR",   "If damage over CPR threshold, how likley?\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .9, 0, true],true,{Lifeline_cpr_likelihood = round (Lifeline_cpr_likelihood * 100)}] call CBA_fnc_addSetting;
+	["Lifeline_CPR_likelihood", "SLIDER",   ["Likelihood of Cardiac Arrest w High Damage",   "If damage over CPR threshold, how likley?\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .9, 0, true],true,{Lifeline_cpr_likelihood = round (Lifeline_cpr_likelihood * 100)}] call CBA_fnc_addSetting;
+	["Lifeline_CPR_less_bleedouttime", "SLIDER",   ["Compress Bleedout Time During Cardiac Arrest",   "If heart is stopped and need CPR, then bleedout time is reduced.\nPercentage of Bleedout time set above.\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .6, 0, true],true,{Lifeline_CPR_less_bleedouttime = round (Lifeline_CPR_less_bleedouttime * 100)}] call CBA_fnc_addSetting;
 	["Lifeline_IncapThres", "SLIDER",   ["Incap Theshold",   "Damage level to trigger incapacitated. Default 0.7\n\n"], "Lifeline Revive Advanced", [0.5, 0.8, 0.7, 1],true,{Lifeline_IncapThres = (round(Lifeline_IncapThres * 10)/10)}] call CBA_fnc_addSetting;
 };
 
@@ -140,11 +141,12 @@ if (Lifeline_ACEcheck_ == false) then {["Lifeline_cntdwn_disply", "SLIDER",   ["
 ["Lifeline_Hotwire", "CHECKBOX", ["Hotwire Locked Vehicles with Toolkit", "Vehicles you cannot access can now be unlocked.\nHotwire them with toolkit.\nIf the vehicle is enclosed, then you need to break in first.\nDoes not apply to armoured units.\n\n"], ["Lifeline Revive","~BONUS. Unrelated to revive but useful"], true,true] call CBA_fnc_addSetting;
 ["Lifeline_ExplSpec", "CHECKBOX", ["Make all your units Explosive Specialists", "It is frustrating when you accidently plant a bomb then cannot undo it.\nThis fixes that.\n\n"], ["Lifeline Revive","~BONUS. Unrelated to revive but useful"], true,true] call CBA_fnc_addSetting;
 
-["Lifeline_HUD_dist_font", "LIST",     ["Font for distance hint",  "Font for distance hint"], ["Lifeline Revive Advanced","DEBUG temporary test"], [[0,1,2,3,4,5,6,7], ["EtelkaMonospacePro","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight"], 0],true] call CBA_fnc_addSetting;
+// ["Lifeline_HUD_dist_font", "LIST",     ["Font for distance hint",  "Font for distance hint"], ["Lifeline Revive Advanced","DEBUG temporary test"], [[0,1,2,3,4,5,6,7], ["EtelkaMonospacePro","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight"], 0],true] call CBA_fnc_addSetting;
+["Lifeline_HUD_dist_font", "LIST",     ["Font for distance hint",  "Font for distance hint"], ["Lifeline Revive Advanced","DEBUG temporary test"], [["EtelkaMonospacePro","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight"], ["EtelkaMonospacePro","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight"], 0],true] call CBA_fnc_addSetting;
 
 ["Lifeline_yellowmarker", "CHECKBOX", ["Yellow marker on incap.", "in debug mode, have yellow marker on incap"], ["Lifeline Revive Advanced","DEBUG"], false,true] call CBA_fnc_addSetting;
 
-["Lifeline_remove_3rd_pty_revive", "CHECKBOX", ["Remove Other Revive Systems Before Mission", "Uncheck this if you want the choice of cancelling Lifeline Revive in the mission.\nNot the best method however, its better to disable mod.\n Do this by unchecking setting 'ENABLE Lifeline Revive' and restarting mission"], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
+["Lifeline_remove_3rd_pty_revive", "CHECKBOX", ["Remove Other Revive Systems Before Mission", "Uncheck this if you want the choice of cancelling Lifeline Revive in the mission.\nNot the best method however, its better to disable mod and restart mission (not restart Arma 3).\nDo this by unchecking 'ENABLE Lifeline Revive' and restarting mission.\n\n"], "Lifeline Revive Advanced", true,true] call CBA_fnc_addSetting;
 ["Lifeline_hintsilent", "CHECKBOX", ["Debug Hints", "Debug Hints. Using BI 'hinstsilent'"], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
 ["Lifeline_debug_soundalert", "CHECKBOX", ["Error Sound Alerts", "Sound Alerts when there is a bug."], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
 ["Lifeline_HUD_names_pairtime", "CHECKBOX", ["incl. pair time for HUD list of units", "incl time for pairs in HUD list of incapped units and medics"], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
@@ -241,7 +243,8 @@ LifelinetxtdebugLayer3 = "Lifelinetxtdebug3" call BIS_fnc_rscLayer;
 
 Debug_to = 2; //for debug sound
 // for experimentation
-Lifelinefonts =["EtelkaMonospacePro","EtelkaMonospaceProBold","EtelkaNarrowMediumPro","LCD14","LucidaConsoleB","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight","TahomaB"];
+// Lifelinefonts =["EtelkaMonospacePro","EtelkaMonospaceProBold","EtelkaNarrowMediumPro","LCD14","LucidaConsoleB","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight","TahomaB"];
+Lifelinefonts =["EtelkaMonospacePro","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight"];
 
 // some missions delete action menus (mouse scroll wheel menu) on start. So this will load the RO
 LifelineREV4_fnc_keyDown = {

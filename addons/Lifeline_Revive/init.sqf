@@ -57,6 +57,12 @@ diag_log "======================================================================
 		player removeAction actionLifelineID4;
 		Lifelinestartedscript = true;
 	};
+	
+	//for single player missions, playable slots don't exist, so change to SIDE
+	if (!isMultiplayer && Lifeline_Scope_CBA == 3) then {
+		Lifeline_Scope_CBA = 2;	
+		hint "Playable Slots dont exist for Single Player. Changing to SIDE";
+	};
 
 
 	if (Lifeline_Scope_CBA == 4 || Lifeline_Scope_CBA == 1) then {
@@ -65,7 +71,7 @@ diag_log "======================================================================
 	if (Lifeline_Scope_CBA == 4 || Lifeline_Scope_CBA == 2) then {
 	actionLifelineID2 = player addAction [format ["<t size='1.5' color='#DAF7A6'>Start Lifeline Revive | </t><t size='1.5' color='#00FF0A'>%1 units</t><t size='1.5' color='#DAF7A6'> | Side</t>",_scope2count], {hint "..initializing";Lifeline_Scope=2;publicVariable "Lifeline_Scope";[] call LifelineremoveactionmenuIDs}];
 	};
-	if (Lifeline_Scope_CBA == 4 || Lifeline_Scope_CBA == 3) then {
+	if ((Lifeline_Scope_CBA == 4 || Lifeline_Scope_CBA == 3) && isMultiplayer) then {
 	// actionLifelineID3 = player addAction [format ["<t size='1.5' color='#DAF7A6'>Start Lifeline Revive | </t><t size='1.5' color='#00FF0A'>%1 units</t><t size='1.5' color='#DAF7A6'> | Side (Slots Only)</t>",_scope3count], {hint "..initializing";Lifeline_Scope=3;publicVariable "Lifeline_Scope";[] call LifelineremoveactionmenuIDs}];
 	actionLifelineID3 = player addAction [format ["<t size='1.5' color='#DAF7A6'>Start Lifeline Revive | </t><t size='1.5' color='#00FF0A'>%1 units</t><t size='1.5' color='#DAF7A6'> | Playable Slots</t>",_scope3count], {hint "..initializing";Lifeline_Scope=3;publicVariable "Lifeline_Scope";[] call LifelineremoveactionmenuIDs}];
 	};

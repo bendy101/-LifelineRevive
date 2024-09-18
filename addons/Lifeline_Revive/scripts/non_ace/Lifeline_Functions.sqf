@@ -1047,7 +1047,7 @@ Lifeline_Medic_Anim_and_Revive = {
 
 
 		};
-		waitUntil {lifestate _incap != "INCAPACITATED"}; // if incap is remote player, sometimes there is a delay. Wait until data catches up.
+ 
 _exit
 };
 
