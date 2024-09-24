@@ -1,3 +1,10 @@
+diag_log "                                                                                                '"; 
+diag_log "                                                                                                '"; 
+diag_log "============================================================================================================='"; 
+diag_log "============================================================================================================='"; 
+diag_log "=========================================== Lifeline_Debugging.sqf ============================================='"; 
+diag_log "============================================================================================================='"; 
+diag_log "============================================================================================================='"; 
 
 // to individually turn off bug detectors
 Debug_Lifeline_downequalstrue = true;	
@@ -102,11 +109,12 @@ Debug_reviveinprogress1dmgfalse = true;
 Lifeline_debug_unit_states = {
 params ["_x"];
 
-	if (alive _x && lifestate _x != "INCAPACITATED" && _x getVariable ["ReviveInProgress",0] == 1 && (_x getVariable ["LifelinePairTimeOut",0]) == 0) then {
-					diag_log format ["%1====== TEMP MINUS ========'", name _x];
-					if (Lifeline_hintsilent) then {hintsilent format ["%1==TEMP MINUS=='", name _x]};
-						playsound "beep_hi_1";
+					if (alive _x && lifestate _x != "INCAPACITATED" && _x getVariable ["ReviveInProgress",0] == 1 && (_x getVariable ["LifelinePairTimeOut",0]) == 0) then {
+						diag_log format ["%1====== TEMP MINUS ========'", name _x];
+						if (Lifeline_hintsilent) then {hintsilent format ["%1==TEMP MINUS=='", name _x]};
+							playsound "beep_hi_1";
 					};
+
 					// if ((isDamageAllowed _x == false || captive _x == true) && alive _x && lifestate _x != "INCAPACITATED" && !(_x getVariable ["Lifeline_Down",false]) && _x getVariable ["ReviveInProgress",0] == 0 && (_x getVariable ["LifelineBleedOutTime",0]) == 0 && !(_x in Lifeline_Process)
 					if (Debug_invincible_or_captive && (isDamageAllowed _x == false || captive _x == true) && alive _x && lifestate _x != "INCAPACITATED" &&  _x getVariable ["ReviveInProgress",0] == 0 && !(_x in Lifeline_Process) // deleted _x getVariable ["LifelineBleedOutTime",0] (unlike line above)
 						&& (isNull findDisplay 60492) && (isNull findDisplay 47) && (isNull findDisplay 48) && (isNull findDisplay 50) && (isNull findDisplay 51) && (isNull findDisplay 58) && (isNull findDisplay 61) && (isNull findDisplay 312) && (isNull findDisplay 314)
@@ -132,14 +140,15 @@ params ["_x"];
 
 								if (Lifeline_hintsilent) then {hintsilent format ["BUG %1\n%2", name _x,_diagtext]};
 								["invincible_or_captive"] remoteExec ["playSound",Debug_to];
-								// = HACKFIX 								
+								// = HACKFIX 
 								if !(local _x) then {
 									[_x, true] remoteExec ["allowDamage",_x];
 									[_x, false] remoteExec ["setCaptive",_x];	
 								} else {
 									_x allowDamage true;
 									_x setCaptive false;		
-								};									
+								};
+								if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};	
 							};
 						};
 					};
@@ -153,16 +162,17 @@ params ["_x"];
 							Debug_LifelineBleedOutTime_not_zero = true;
 							if (lifestate _x != "INCAPACITATED" && alive _x && (_x getVariable ["LifelineBleedOutTime",0]) != 0 && !(_x in Lifeline_Process) 
 								) then {
-								diag_log format ["%1 LifelineBleedOutTime NOT ZERO uuuuuuuuuu BUG uuuuuuuuuu damage:%2 captive:%3 LifelineBleedOutTime:%4'", name _x, isDamageAllowed _x, captive _x, (_x getVariable ["LifelineBleedOutTime",0])];
-								diag_log format ["%1 LifelineBleedOutTime NOT ZERO uuuuuuuuuu BUG uuuuuuuuuu damage:%2 captive:%3 LifelineBleedOutTime:%4'", name _x, isDamageAllowed _x, captive _x, (_x getVariable ["LifelineBleedOutTime",0])];
-								diag_log format ["%1 LifelineBleedOutTime NOT ZERO uuuuuuuuuu BUG uuuuuuuuuu damage:%2 captive:%3 LifelineBleedOutTime:%4'", name _x, isDamageAllowed _x, captive _x, (_x getVariable ["LifelineBleedOutTime",0])];
+								diag_log format ["%1 BleedOutTime NOT ZERO uuuuuuuuuu BUG uuuuuuuuuu damage:%2 captive:%3 LifelineBleedOutTime:%4'", name _x, isDamageAllowed _x, captive _x, (_x getVariable ["LifelineBleedOutTime",0])];
+								diag_log format ["%1 BleedOutTime NOT ZERO uuuuuuuuuu BUG uuuuuuuuuu damage:%2 captive:%3 LifelineBleedOutTime:%4'", name _x, isDamageAllowed _x, captive _x, (_x getVariable ["LifelineBleedOutTime",0])];
+								diag_log format ["%1 BleedOutTime NOT ZERO uuuuuuuuuu BUG uuuuuuuuuu damage:%2 captive:%3 LifelineBleedOutTime:%4'", name _x, isDamageAllowed _x, captive _x, (_x getVariable ["LifelineBleedOutTime",0])];
 								//var dump
-								_diagtext = "LifelineBleedOutTime NOT ZEROs"; if !(local _x) then {[_x,_diagtext] remoteExec ["serverSide_unitstate", 2];[_diagtext] remoteExec ["serverSide_Globals", 2];
+								_diagtext = "BleedOutTime NOT ZERO"; if !(local _x) then {[_x,_diagtext] remoteExec ["serverSide_unitstate", 2];[_diagtext] remoteExec ["serverSide_Globals", 2];
 								} else {[_x,_diagtext] call serverSide_unitstate;[_diagtext] call serverSide_Globals;};
 								if (Lifeline_hintsilent) then {hintsilent format ["BUG %1\n%2", name _x,_diagtext]};
-								["LifelineBleedOutTime_not_zero"] remoteExec ["playSound",Debug_to];
+								["BleedOutTime_not_zero"] remoteExec ["playSound",Debug_to];
 								// = HACKFIX 
-								_x setVariable ["LifelineBleedOutTime",0,true];									
+								_x setVariable ["LifelineBleedOutTime",0,true];
+								if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};	
 							};
 						};
 					};	
@@ -297,6 +307,17 @@ params ["_x"];
 					};					
 
 
+};
+
+
+LifelineSpeedMarker = {
+	params ["_medic","_line"];
+	if (speed _medic < 0.1) then {
+		_largecyanmark = _medic getVariable ["cyanmarker1", nil]; 
+		if (!isNil "_largecyanmark") then {deleteVehicle _largecyanmark};				
+		_largecyanmark = createVehicle ["Sign_Arrow_Large_Cyan_F", getPos _medic,[],0,"can_collide"];
+		_medic setVariable ["cyanmarker1", _largecyanmark, true]; 
+	};
 };
 
 // TEMP

@@ -8,6 +8,8 @@ diag_log "======================================================================
 
 [] execvm "Lifeline_Revive\scripts\Lifeline_Debugging.sqf"; 
 
+
+// these functions here for text aligned on right edge of screen according to screen resolution.
 Lifeline_get_right_align = {
 	((safeZoneW - 1) * 0.48)
 };
@@ -31,23 +33,12 @@ Lifeline_display_textright2 = {
 
 
 waitUntil {time > 0}; //pause until game started
-
-
-
-
-
-
-
+diag_log "===============================START fix_other_revive_systems.sqf==========================='";
 if (isNil "oldACE") then {
 		Lifeline_ACEcheck_ = false;
 	} else {
 		Lifeline_ACEcheck_ = true;
 };
-
-
-
-
-
 
 // attempt to remove 3rd part revives AFTER mission load. This method not recomended, use CBA setting to do this before mission for more thourough method.
 if (isNil "oldACE" && Lifeline_remove_3rd_pty_revive == false) then {
@@ -174,24 +165,7 @@ if (isNil "oldACE" && Lifeline_remove_3rd_pty_revive == false) then {
 	// FORCE DISABLE BI Revive for Lifeline_RevMethod 2. (this works. I could not get the global turnoff working.)
 	BI_ReviveDetected_ = getMissionConfigValue ["ReviveMode", 0]; 
 	if ((player call BIS_fnc_reviveEnabled) == true) then {BI_ReviveDetected_ = 1};
-	// each player loads this file locally....so code beloow not needed? commented out.
-	/* 
-	if (BI_ReviveDetected_ == 1 && Lifeline_RevMethod == 2 ) then { // BI revive if teamswitch is on OR of Lifeline_RevMethod == 2
-		// if (Lifeline_RevMethod == 2 || Lifeline_RevMethod == 1 && teamSwitchEnabled == true) then { // BI revive if teamswitch is on OR of Lifeline_RevMethod == 2
-		{
-			// if (isPlayer _x && (_x call BIS_fnc_reviveEnabled)) then {   // I suspect the BI Revive (vanilla) are running on AI units also to deal with teamswitch. So commentd out req for players only
-			if (_x call BIS_fnc_reviveEnabled) then {   
-				if (local _x) then {
-					[_x] call BIS_fnc_disableRevive;
-				} else {
-					[_x] remoteExec ["BIS_fnc_disableRevive"];
-				};
-			};	
-			// _x removeAllEventHandlers "handleDamage";
-			// } foreach (allunits select {isplayer _x && simulationEnabled _x});
-		} foreach (allunits select {(side _x == Lifeline_Side or side _x == civilian) && simulationEnabled _x });
-	};
-	 */
+
 
 	//remove BI revive
 	if !(isDedicated) then {
@@ -204,32 +178,14 @@ if (isNil "oldACE" && Lifeline_remove_3rd_pty_revive == false) then {
 		// [format ["%1 !!!!!!!!! REMOVE ALL DAMAGE HANDLERS PLAYER !!!!!!!!!!!!!", name player]] remoteExec ["diag_log", 2];
 	};
 
-	// remove damage handlers for AI
-	/* if (isServer) then {
-		{		
-			if !(isPlayer _x) then {
-				if (local _x) then {
-					_x removeAllEventHandlers "handleDamage";
-				} else {
-					[_x,"handleDamage"] remoteExec ["removeAllEventHandlers"];
-				};
-			};
-		} foreach (allunits select {(side _x == Lifeline_Side or side _x == civilian) && simulationEnabled _x });
-	}; */	
-	// sleep 10;
-
 	if (BI_ReviveDetected_ == 0) then {
 	};
-
 
 
     // ==========DETECT MISSION TYPE WITH HINT AT START
 
 		 _text = ""; 
 		 _tickets = 0; 
-		 // _colour = "F9CAA7"; 
-		 // _colour = "669900"; 
-		 // _colour = "0c894a"; 
 		 _colour = "14d145"; 
 
 		 if (teamSwitchEnabled == true) then { 
@@ -293,7 +249,6 @@ if (isNil "oldACE" && Lifeline_remove_3rd_pty_revive == false) then {
 // }; // end isNil "oldACE"
 
 
-
 //============================ LOAD MAIN FILES =============================
 // if (isNil "oldACE") then {
 	// [] execvm "Lifeline_Revive\scripts\non_ace\Lifeline_DamageHandlerFNC.sqf";
@@ -304,8 +259,4 @@ if (isNil "oldACE" && Lifeline_remove_3rd_pty_revive == false) then {
 if (Lifeline_Hotwire) then {
 	[] execvm "Lifeline_Revive\scripts\bonus\hotwire_vehicles.sqf"; 
 };
-
-
-
-
 

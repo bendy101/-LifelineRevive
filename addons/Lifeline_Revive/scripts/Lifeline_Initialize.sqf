@@ -1,9 +1,16 @@
+diag_log "                                                                                                '"; 
+diag_log "                                                                                                '"; 
+diag_log "============================================================================================================='"; 
+diag_log "============================================================================================================='"; 
+diag_log "======================================== Lifeline_Initialize.sqf ==============================================='"; 
+diag_log "============================================================================================================='"; 
+diag_log "============================================================================================================='"; 
 // Just some variables to set.
 
 	Lifeline_yellowmarker = true;
 	Lifeline_remove_3rd_pty_revive = true;
 	Lifeline_RevMethod = 2; 
-	Lifeline_hintsilent = false;
+	Lifeline_hintsilent = true;
 	Lifeline_debug_soundalert = true;
 	Lifeline_HUD_names_pairtime = true;
 	Lifeline_DEH_CallMethod = 2;	// 1 = "remoteexec ['addeventhandler', _x] (Default)",
@@ -22,9 +29,12 @@
 	LifelinetxtdebugLayer2 = "Lifelinetxtdebug2" call BIS_fnc_rscLayer; 
 	LifelinetxtdebugLayer3 = "Lifelinetxtdebug3" call BIS_fnc_rscLayer; 
 
-	// for experimentation
-	Lifelinefonts =["EtelkaMonospacePro","EtelkaMonospaceProBold","EtelkaNarrowMediumPro","LCD14","LucidaConsoleB","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight","TahomaB"];
-	Lifeline_HUD_dist_font = 6;
+	// FONTS
+	// Lifelinefonts =["EtelkaMonospacePro","EtelkaMonospaceProBold","EtelkaNarrowMediumPro","LCD14","LucidaConsoleB","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight","TahomaB"];
+	Lifelinefonts =["EtelkaMonospacePro","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight"];
+	//select the font above
+	_selectfont = 5;
+	Lifeline_HUD_dist_font = Lifelinefonts select _selectfont;
 
 
 	publicVariable "Lifeline_Scope";

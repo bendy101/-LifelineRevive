@@ -1,3 +1,10 @@
+diag_log "                                                                                                '"; 
+diag_log "                                                                                                '"; 
+diag_log "============================================================================================================='"; 
+diag_log "============================================================================================================='"; 
+diag_log "========================================== Lifeline_ACE_Functions.sqf =========================================='"; 
+diag_log "============================================================================================================='"; 
+diag_log "============================================================================================================='"; 
 
 ["ace_unconscious", {
 	params ["_unit",  "_status"];
@@ -68,6 +75,7 @@
 
 Lifeline_ACE_Anims_Voice = {
 params ["_incap", "_medic","_EnemyCloseBy","_voice","_switch", "_againswitch", "_encourage","_enc_count"];
+
 		// Kneeling revive - no near enemy
 		if (isNull _EnemyCloseBy) then {
 		[_medic, "AinvPknlMstpSnonWnonDnon_medic4"] remoteExec ["playMove", _medic]; // ORIGNAL
@@ -80,6 +88,7 @@ params ["_incap", "_medic","_EnemyCloseBy","_voice","_switch", "_againswitch", "
 						};
 					sleep 4;
 		};
+
 		// Lying down revive - near enemy. Alternating between two anims to fix an Arma bug
 		if (!isNull _EnemyCloseBy) then {
 					if (_switch == 0) then {

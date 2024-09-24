@@ -1,33 +1,24 @@
-Lifeline_Version = "Lifeline Revive AI";
-diag_log "                                                                                 				               "; 
-diag_log "                                                                                  			               "; 
-diag_log "                                                                                    			               "; 
-diag_log "                                                                                   		   	               "; 
+Lifeline_Version = "Lifeline Revive AI DEBUG";
 diag_log "                                                                                   			               '"; 
 diag_log "============================================================================================================='";
 diag_log "==================================================== MOD ===================================================='";
 diag_log "============================================== XEH_preInit.sqf =============================================='";
 diag_log "============================================================================================================='";
 diag_log "============================================================================================================='";
-diag_log Lifeline_Version;
+diag_log format ["================================ VERSION: %1    '", Lifeline_Version];
+
 
 
 // check for ACE medical
 if (isClass (configFile >> "cfgPatches" >> "ace_medical")) then {
-diag_log "+++++++++++ACE MEDICAL+++++++++++++++";
-Lifeline_ACEcheck_ = true;
+	diag_log "++++++++++++++++++++ ACE MEDICAL +++++++++++++++++++'";
+	Lifeline_ACEcheck_ = true;
 } else {
-oldACE = nil;
-Lifeline_ACEcheck_ = false;
-diag_log "=====kkkkkkkkkkkkkkkkkkkkkkkkkkk NO ACE MEDICAL kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk====";
-diag_log "=====kkkkkkkkkkkkkkkkkkkkkkkkkkk NO ACE MEDICAL kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk====";
-diag_log "=====kkkkkkkkkkkkkkkkkkkkkkkkkkk NO ACE MEDICAL kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk====";
-diag_log "=====kkkkkkkkkkkkkkkkkkkkkkkkkkk NO ACE MEDICAL kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk====";
+	oldACE = nil;
+	Lifeline_ACEcheck_ = false;
+	diag_log "++++++++++++++++++++ NO ACE MEDICAL ++++++++++++++++++++'";
 };
 
-
-testicles = [1,2,3];
-diag_log format ["xxxxxxxxxxxxxx XEH_preInit.sqf testicles %1", testicles];
 
 #include "\a3\ui_f\hpp\defineDIKCodes.inc"
 
@@ -69,7 +60,7 @@ if (Lifeline_ACEcheck_ == false) then {
 	["Lifeline_autoRecover", "SLIDER",   ["Auto Recover",   "Percentage chance of regaining consciousness\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .3, 0, true],true,{Lifeline_autoRecover = round (Lifeline_autoRecover * 100)}] call CBA_fnc_addSetting;
 	// ["Lifeline_CPR_likelihood", "SLIDER",   ["Likelihood of needing CPR",   "If damage over CPR threshold, how likley?\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .9, 0, true],true,{Lifeline_cpr_likelihood = round (Lifeline_cpr_likelihood * 100)}] call CBA_fnc_addSetting;
 	["Lifeline_CPR_likelihood", "SLIDER",   ["Likelihood of Cardiac Arrest w High Damage",   "If damage over CPR threshold, how likley?\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .9, 0, true],true,{Lifeline_cpr_likelihood = round (Lifeline_cpr_likelihood * 100)}] call CBA_fnc_addSetting;
-	["Lifeline_CPR_less_bleedouttime", "SLIDER",   ["Compress Bleedout Time During Cardiac Arrest",   "If heart is stopped and need CPR, then bleedout time is reduced.\nPercentage of Bleedout time set above.\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .6, 0, true],true,{Lifeline_CPR_less_bleedouttime = round (Lifeline_CPR_less_bleedouttime * 100)}] call CBA_fnc_addSetting;
+	["Lifeline_CPR_less_bleedouttime", "SLIDER",   ["Less Bleedout Time when Cardiac Arrest",   "If heart is stopped and need CPR, then bleedout time is compressed to this percentage.\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .6, 0, true],true,{Lifeline_CPR_less_bleedouttime = round (Lifeline_CPR_less_bleedouttime * 100)}] call CBA_fnc_addSetting;
 	["Lifeline_IncapThres", "SLIDER",   ["Incap Theshold",   "Damage level to trigger incapacitated. Default 0.7\n\n"], "Lifeline Revive Advanced", [0.5, 0.8, 0.7, 1],true,{Lifeline_IncapThres = (round(Lifeline_IncapThres * 10)/10)}] call CBA_fnc_addSetting;
 };
 
@@ -94,7 +85,6 @@ New method: no weapon pulled out between bandages - but due to arma bugs - there
 
 // if (isNil "oldACE") then {
 if (Lifeline_ACEcheck_ == false) then {
-	
 	// ["Lifeline_kill_other_revives", "CHECKBOX", ["Kill Other Revive Systems (experimental)", "Kill Other Revive Systems like Psycho Revive"], "Lifeline Revive", true] call CBA_fnc_addSetting;
 //setting this variable not found error for when ACE is not loaded. Fix this all later with better method.
 Lifeline_ACE_Bandage_Method = 1;
@@ -127,10 +117,15 @@ if (Lifeline_ACEcheck_ == false) then {["Lifeline_cntdwn_disply", "SLIDER",   ["
 // ["Lifeline_HUD_names", "CHECKBOX", ["HUD list of incapped units and medics", "Just show names of who is being revived\n\n"], ["Lifeline Revive","HUD & MAP"], false,true] call CBA_fnc_addSetting;
 ["Lifeline_HUD_names", "LIST",     ["Realtime list of units", 
 "0. Off
-1. On.
-2. With distance & bandages
-3. With only distance
-4. With only bandages \n\n"], ["Lifeline Revive","HUD & MAP"], [[0, 1, 2, 3, 4], ["Off","On", "On with distance & bandages", "On with only distance", "On with only bandages"], 0],true] call CBA_fnc_addSetting;
+1. Names
+2. Names, distance & bandage
+3. Names & distance
+4. Names & bandage
+
+*note there is an extra option available in debugging, 
+the revive pair timer called 
+'pair timer for HUD list of units'.
+This is the timeout left before resetting the medic.  \n\n"], ["Lifeline Revive","HUD & MAP"], [[0, 1, 2, 3, 4], ["Off","Names", "Names, distance & bandage", "Names & distance", "Names & bandage"], 0],true] call CBA_fnc_addSetting;
 
 ["Lifeline_Map_mark", "CHECKBOX", ["Show markers on map", "Incapacitated and dead shown on map\n\n"], ["Lifeline Revive","HUD & MAP"], false,true] call CBA_fnc_addSetting;
 
@@ -149,7 +144,7 @@ if (Lifeline_ACEcheck_ == false) then {["Lifeline_cntdwn_disply", "SLIDER",   ["
 ["Lifeline_remove_3rd_pty_revive", "CHECKBOX", ["Remove Other Revive Systems Before Mission", "Uncheck this if you want the choice of cancelling Lifeline Revive in the mission.\nNot the best method however, its better to disable mod and restart mission (not restart Arma 3).\nDo this by unchecking 'ENABLE Lifeline Revive' and restarting mission.\n\n"], "Lifeline Revive Advanced", true,true] call CBA_fnc_addSetting;
 ["Lifeline_hintsilent", "CHECKBOX", ["Debug Hints", "Debug Hints. Using BI 'hinstsilent'"], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
 ["Lifeline_debug_soundalert", "CHECKBOX", ["Error Sound Alerts", "Sound Alerts when there is a bug."], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
-["Lifeline_HUD_names_pairtime", "CHECKBOX", ["incl. pair time for HUD list of units", "incl time for pairs in HUD list of incapped units and medics"], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
+["Lifeline_HUD_names_pairtime", "CHECKBOX", ["pair timer for HUD list of units", "incl time for pairs in HUD list of incapped units and medics"], ["Lifeline Revive Advanced","DEBUG"], true,true] call CBA_fnc_addSetting;
 
 
 // ["Lifeline_DEH_CallMethod", "LIST",     ["How to remoteexec the DEH",  "Jaaa\n\n"], ["Lifeline Revive Advanced","DEBUG temporary testing"], [[1,2,3,4], ["remoteexec ['addeventhandler', _x] (Default)","remoteExec ['call'] curley brackets {}", "remoteExec FNC ['Lifeline_custom_DamageH'", "remoteExec CALL FNC ['Lifeline_custom_DamageH'" ], 0],true] call CBA_fnc_addSetting;
@@ -169,7 +164,6 @@ if (Lifeline_remove_3rd_pty_revive == true && Lifeline_revive_enable) then {
 	// Overwrite player initialization.
 	far_player_init = compileFinal "";
 	[{!isNil "far_debugging"}, {
-	diag_log format ["%1 uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu WAIT AND EXECUTE Farooq Revive uuuuuuuuuuuuuuuuuuuuuuuuuuuuuu", far_debugging];	
 		far_isDragging = nil;  // Disable "Drag & Carry animation fix" loop - cannot be killed because spawned while true.
 		far_muteRadio = nil;   // Disable initialization hint.
 		far_muteACRE = nil;    // Same, but for very old versions.
@@ -178,22 +172,21 @@ if (Lifeline_remove_3rd_pty_revive == true && Lifeline_revive_enable) then {
 
 	//Physcho Revive (old)
 	player setVariable ["tcb_ais_aisInit",true];
-	diag_log format ["!!!!!!!!!!!!!!!!!!!! IN MY FILE tcb_ais_aisInit = %1 player !!!!!!!!!!!!!!!!!!!!!", player getVariable "tcb_ais_aisInit"];
 	//Trick Physcho Revive into thinking ACE is loaded, so it exits.
 	// PAR_revive = compileFinal "PAR_revive = true";
 
 
 	[{!isNil "GRLIB_revive"}, {
 		GRLIB_revive = 0; 
-	diag_log format ["%1 uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu WAIT AND EXECUTE GRLIB_revive uuuuuuuuuuuuuuuuuuuuuuuuuuuuuu", GRLIB_revive];	
 	}, [], 5] call CBA_fnc_waitUntilAndExecute;
 	// [{!isNil "GRLIB_fatigue"}, {
 		// GRLIB_fatigue = 1;  
-		// diag_log format ["%1 uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu WAIT AND EXECUTE GRLIB_fatigue uuuuuuuuuuuuuuuuuuuuuuuuuuuuuu", GRLIB_fatigue];	
 	// }, [], 5] call CBA_fnc_waitUntilAndExecute;
 	[{!isNil "FHQ_FirstAidSystem"}, {
 		FHQ_FirstAidSystem = 0;  
-		diag_log format ["%1 uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu WAIT AND EXECUTE FHQ_FirstAidSystem uuuuuuuuuuuuuuuuuuuuuuuuuuuuuu", FHQ_FirstAidSystem];	
+	}, [], 5] call CBA_fnc_waitUntilAndExecute;
+	[{!isNil "G_Revive_System"}, {
+		G_Revive_System = false;  
 	}, [], 5] call CBA_fnc_waitUntilAndExecute;
 
 
@@ -218,12 +211,11 @@ if (Lifeline_remove_3rd_pty_revive == true && Lifeline_revive_enable) then {
 	PAR_EventHandler = compileFinal nil; */
 
 };
-diag_log "nnnnnnnnnnnnnnnnnnnnnnnnnnnn TEMP TEST";
+
 //TEMPTEST
 {
     if (!isPlayer _x) then {
         _x enableAI "ALL";
-		diag_log name _x;
     };
 } forEach allUnits;
 
@@ -251,19 +243,14 @@ LifelineREV4_fnc_keyDown = {
     // Code to execute when the key is pressed down.
     // You can put your function logic here.
     // hint "MyKey is pressed!";
-diag_log "   ";
-diag_log " ------------------------- ";
-diag_log format ["Keybind Setting: %1", keybindSetting];
-diag_log " ------------------------- ";
-hint "..initializing";
-execVM "\Lifeline_Revive\init.sqf";
-execVM "\Lifeline_Revive\initserver.sqf";
+	hint "..initializing";
+	execVM "\Lifeline_Revive\init.sqf";
+	execVM "\Lifeline_Revive\initserver.sqf";
 };
 
 /* LifelineREV4_fnc_keyUp = {
     // Code to execute when the key is released.
     // You can put your function logic here.
-   diag_log  "MyKey is released!";
 }; 
  */
 
@@ -276,6 +263,7 @@ Debug_Zeusorthirdparty = true;
 Debug_invincible_or_captive = true;
 Debug_incapdeathtimelimit_not_zero = true;
 Debug_reviveinprogresserror = true;
+
 
 
 };

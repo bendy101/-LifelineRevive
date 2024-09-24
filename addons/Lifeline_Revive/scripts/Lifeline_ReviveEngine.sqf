@@ -64,6 +64,7 @@ if (BI_RespawnDetected in [4,5]) then {
 			params ["_unit", "_corpse"];
 		}];
 	}];
+
 	//change font colour in teamswitch pop-up for incap units
 	fnc_teamSwitch = { 
 	  disableSerialization; 
@@ -89,6 +90,7 @@ if (BI_RespawnDetected in [4,5]) then {
 		(_displ displayCtrl 1) ctrlShow true 
 	  } 
 	}; 
+
 	[] spawn { 
 	  while {true} do { 
 		waituntil {sleep 0.2; !isnull findDisplay 632}; 
@@ -106,13 +108,11 @@ if (BI_RespawnDetected in [4,5]) then {
 }; // if (BI_RespawnDetected in [4,5]) then {
 
 
-
-
-
+// === NON-ACE FUNCTIONS
 if (Lifeline_RevMethod != 3) then {  
 	[] execvm "Lifeline_Revive\scripts\non_ace\Lifeline_Functions.sqf";
 }; 
-
+// === ACE FUNCTIONS
 if (Lifeline_RevMethod == 3) then {  
 	[] execvm "Lifeline_Revive\scripts\ace\Lifeline_ACE_Functions.sqf";
 }; 	
@@ -124,16 +124,19 @@ if (isServer) then {
 	Lifeline_All_Units = [];
 	publicVariable "Lifeline_All_Units";
 	Lifelinecompletedinit = 1; //just for the hint showing units initializing
+	Lifelineunitscount_pre = 0;
 
 	Lifeline_DH_update = {
 
+		if (Lifelinecompletedinit > 1) then {	
+			Lifelineunitscount_pre = (count Lifeline_All_Units);
+		};
+
 		// GROUP
-		// if (Lifeline_Scope == 1 && isDedicated) then {Lifeline_All_Units = allunits select {isplayer leader _x && simulationEnabled _x && rating _x > -2000}}; //this needs fixing. if player incapped, then all units go out of group.
 		if (Lifeline_Scope == 1 && isDedicated) then {_groupsWPlayers = allGroups select {{isPlayer _x} count (units _x) > 0 }; Lifeline_All_Units = allunits select {(group _x) in _groupsWPlayers && simulationEnabled _x && rating _x > -2000}};
 		if (Lifeline_Scope == 1 && !isDedicated) then {Lifeline_All_Units = allunits select {group _x == group player && simulationEnabled _x && rating _x > -2000}};
 
 		// SIDE	
-		// if (Lifeline_Scope == 2) then {Lifeline_All_Units = allunits select {(side _x == Lifeline_Side or side _x == civilian) && simulationEnabled _x && rating _x > -2000 && _x checkAIFeature "ANIM"}}; //disable line 1083 in Lifeline_Global.sqf "_medic disableAI "ANIM"; "
 		if (Lifeline_Scope == 2) then {Lifeline_All_Units = allunits select {(side _x == Lifeline_Side or side _x == civilian) && simulationEnabled _x && rating _x > -2000}};
 
 		// ALL PLAYABLE (SLOTS)
@@ -141,7 +144,11 @@ if (isServer) then {
 
 		publicVariable "Lifeline_All_Units";
 		waitUntil {count Lifeline_All_Units >0};
-		Lifelineunitscount = (count Lifeline_All_Units); // added to indicate with a hint when all units are processed below		
+		Lifelineunitscount = (count Lifeline_All_Units); // added to indicate with a hint when all units are processed below	
+
+		if (Lifelineunitscount != Lifelineunitscount_pre) then {
+			Lifelinecompletedinit = Lifelineunitscount_pre + 1;
+		};
 
 		// Add needed settings to each unit.
 		{
@@ -160,7 +167,11 @@ if (isServer) then {
 
 				//set skill for your AI Units	
 				if (Lifeline_AI_skill > 0) then {
-				_x setSkill Lifeline_AI_skill;
+					_x setSkill Lifeline_AI_skill;
+				};
+				//all units stop command for debugging
+				if (Lifeline_Revive_debug) then {
+					doStop _x;
 				};
 
 				//set Fatigue for all units. Bypass if 0
@@ -171,9 +182,14 @@ if (isServer) then {
 						if (local _x) then {_x enableFatigue true;} else {[_x, true] remoteExec ["enableFatigue", _x];};
 					};				
 				};
-				//make units explosivespecialists to be able to deactivate explosive satchels etc
-				// if (Lifeline_ExplSpec) then {_x setUnitTrait ["ExplosiveSpecialist", true]};
-				if (Lifeline_ExplSpec) then {if (local _x) then {_x setUnitTrait ["ExplosiveSpecialist", true];} else {[_x, ["ExplosiveSpecialist", true]] remoteExec ["setUnitTrait", _x]}};
+
+				//make units "explosivespecialists" trait. Its annoying not being able to unset a bomb when accidently set. 
+				if (Lifeline_ExplSpec) then {
+					if (local _x) then {
+						_x setUnitTrait ["ExplosiveSpecialist", true];
+					} else {
+						[_x, ["ExplosiveSpecialist", true]] remoteExec ["setUnitTrait", _x]}
+				};
 
 				if (Lifeline_RevMethod == 2) then { 
 					_x setVariable ["Lifeline_allowdeath",false,true];
@@ -210,6 +226,7 @@ if (isServer) then {
 								};
 					}];
 				};
+
 				// set "added" trigger 
 				_x setVariable ["LifelineDHadded",true,true];
 
@@ -227,31 +244,6 @@ if (isServer) then {
 
 	[] call Lifeline_DH_update; 
 
-
-	/* 
-	   - FORCE ENABLE BI REVIVE FOR Lifeline_RevMethod 1. (unless teamswitch enabled, or respawn turned off)
-	   - Set super high BI bleedout timer because Lifeline Revive has own timer.
-	   - Change the BI Revive severity level depending on Lifeline Instant Death setting. 
-		 (for Lifeline_RevMethod 2 - the BI Revive must be disabled, but I couldnt get global method working. But I did per-unit, so in the loop below)
-	*/
-
-	if (Lifeline_RevMethod != 3) then {
-		if (Lifeline_RevMethod == 1 && teamSwitchEnabled == false && BI_RespawnDetected != 0) then {
-			bis_reviveParam_mode = 1;
-			bis_reviveParam_bleedOutDuration = 99999;
-			if (Lifeline_InstantDeath == 0) then {
-				bis_reviveParam_unconsciousStateMode = 0;
-			} else {
-				bis_reviveParam_unconsciousStateMode = 1;
-			};
-			[] call BIS_fnc_reviveInit;
-		};	
-		// although not needed (according to tests), better to also do this for Lifeline_RevMethod 2, coz thats what its for.
-		if (Lifeline_RevMethod == 2) then {
-			bis_reviveParam_mode = 0;
-			[] call BIS_fnc_reviveInit;
-		};
-	};	
 }; // end isserver
 
 
@@ -265,6 +257,7 @@ if (isServer) then {
 		_alldown = true;
 		_autorevive = false;
 			{
+
 				//check if bleeding. both for ACE and non-ACE
 				_isbleeding = false;
 				if (Lifeline_RevMethod == 3) then {
@@ -274,6 +267,7 @@ if (isServer) then {
 						_isbleeding = true;
 					};
 				};
+
 				// Self heal for AI
 				if (!isPlayer _x && !(lifestate _x == "INCAPACITATED") && alive _x && _isbleeding == true 
 					&& _x getVariable ["Lifeline_selfheal_progss",false] == false
@@ -293,9 +287,7 @@ if (isServer) then {
 				};	
 
 				// Add Player incap to incap array
-				// if (isplayer _x && lifeState _x == "INCAPACITATED" &&  !(_x in Lifeline_incapacitated)) then {
 				if (lifeState _x == "INCAPACITATED" &&  !(_x in Lifeline_incapacitated)) then {
-				// if (lifeState _x == "INCAPACITATED" &&  !(_x in Lifeline_incapacitated)) then {
 					Lifeline_incapacitated pushBackUnique _x;
 					publicVariable "Lifeline_incapacitated";
 					/* if (_x in Lifeline_Process) then {
@@ -312,13 +304,8 @@ if (isServer) then {
 					publicVariable "Lifeline_Process";
 				};
 
-				// Remove captive state for medics and incaps
-				// if (captive _x && !(_x in Lifeline_Process) && !(lifeState _x == "INCAPACITATED")) then {
-					// [_x,false] remoteExec ["setCaptive",_x];
-				// };
-
 				// Clear processing if no incap
-				if (count Lifeline_incapacitated ==0 && count Lifeline_Process >0) then {
+				if (count Lifeline_incapacitated == 0 && count Lifeline_Process >0) then {
 					Lifeline_Process = [];
 					publicVariable "Lifeline_Process";
 				};
@@ -431,11 +418,49 @@ if (isServer) then {
 				if (Lifeline_Revive_debug) then {				
 					[_x] call Lifeline_debug_unit_states;
 				}; 
-				//HACK FIX 
-				if (alive _x && lifestate _x == "INCAPACITATED" && captive _x == false && Lifeline_RevProtect != 3) then {
-					// [_x,true] remoteExec ["setCaptive", _x]; 
-					_x setCaptive true; 				
+
+				// ========================= HACK FIX ====================== 
+				// these are hacks to fix variables that sometimes dont get set, due to network errors etc.
+				if (Lifeline_Revive_debug == false) then {
+					if (alive _x && lifestate _x == "INCAPACITATED" && captive _x == false && Lifeline_RevProtect != 3) then {
+						if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};
+						// [_x,true] remoteExec ["setCaptive", _x]; 
+						_x setCaptive true; 				
+					};
+
+					if ((isDamageAllowed _x == false || captive _x == true) && alive _x && lifestate _x != "INCAPACITATED" &&  _x getVariable ["ReviveInProgress",0] == 0 && !(_x in Lifeline_Process) // deleted _x getVariable ["LifelineBleedOutTime",0] (unlike line above)
+						&& (isNull findDisplay 60492) && (isNull findDisplay 47) && (isNull findDisplay 48) && (isNull findDisplay 50) && (isNull findDisplay 51) && (isNull findDisplay 58) && (isNull findDisplay 61) && (isNull findDisplay 312) && (isNull findDisplay 314)) then {
+						[_x] spawn {
+							params ["_x"];
+							sleep 7;
+							// if ((isDamageAllowed _x == false || captive _x == true) && alive _x && lifestate _x != "INCAPACITATED" && !(_x getVariable ["Lifeline_Down",false]) && _x getVariable ["ReviveInProgress",0] == 0 && (_x getVariable ["LifelineBleedOutTime",0]) == 0 && !(_x in Lifeline_Process)
+							if ((isDamageAllowed _x == false || captive _x == true) && alive _x && lifestate _x != "INCAPACITATED" && !(_x getVariable ["Lifeline_Down",false]) && _x getVariable ["ReviveInProgress",0] == 0 && !(_x in Lifeline_Process)  // deleted _x getVariable ["LifelineBleedOutTime",0] (unlike line above)
+								&& (isNull findDisplay 60492) && (isNull findDisplay 47) && (isNull findDisplay 48) && (isNull findDisplay 50) && (isNull findDisplay 51) && (isNull findDisplay 58) && (isNull findDisplay 61) && (isNull findDisplay 312) && (isNull findDisplay 314)) then {
+									if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};
+									if !(local _x) then {
+										[_x, true] remoteExec ["allowDamage",_x];
+										[_x, false] remoteExec ["setCaptive",_x];	
+									} else {
+										_x allowDamage true;
+										_x setCaptive false;		
+									};			
+							};									
+						};
+					};					
+
+					if (lifestate _x != "INCAPACITATED" && alive _x && (_x getVariable ["LifelineBleedOutTime",0]) != 0 && !(_x in Lifeline_Process)) then {
+						[_x] spawn {
+							params ["_x"];
+							sleep 7;
+							if (lifestate _x != "INCAPACITATED" && alive _x && (_x getVariable ["LifelineBleedOutTime",0]) != 0 && !(_x in Lifeline_Process) ) then {
+								if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};							
+								_x setVariable ["LifelineBleedOutTime",0,true];									
+							};
+						};
+					};	
 				};
+				//========================= END Hack fixes ==================
+
 			} foreach Lifeline_All_Units;
 
 
@@ -480,6 +505,7 @@ if (isServer) then {
 					};
 				// };
 			};
+
 			sleep 2;
 		}; // end while
 	}; // end spawn
@@ -492,32 +518,18 @@ if (isServer) then {
 				_diag_text = "";
 
 						// timer for bleedout or autorecover
-						{						
-							//======= Sometimes teamswitch screws up Lifeline_incapacitated with ghost units. This fixes that.
-						/* 	if !(_x in Lifeline_All_Units) then {
-								// hackfix8 = false;
-								[_x] spawn {
-									params ["_x"];
-									sleep 5;
-									// hackfix8 = true;
-									if (!(_x in Lifeline_All_Units) && _x in Lifeline_incapacitated) then {									
-									Lifeline_incapacitated = Lifeline_incapacitated - [_x];
-									_x setVariable ["ReviveInProgress",0,true];								
-									if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};
-									if (Lifeline_hintsilent) then {hintsilent format ["HACK FIX %1\n%2", name _x,"HACK FIX. UNIT NOT IN Lifeline_All_Units"]};									
-									};
-								}; // spawn 
-							}; //if !(_x in Lifeline_All_Units) then { */
+						{	
 
 							if (Lifeline_RevMethod != 3) then {
-								if ((_x getVariable ["LifelineBleedOutTime",0])>0) then {
 
+								if ((_x getVariable ["LifelineBleedOutTime",0])>0) then {
 
 										_bleedout = ""; // this is just for diag_log
 										// _bleedouttime = _x getVariable "LifelineBleedOutTime";
 										_bleedouttime = (_x getVariable "LifelineBleedOutTime") + 1; // with extra second so happens on 0
 										_autoRecover = _x getVariable ["Lifeline_autoRecover",false];	
 										_bleedout_half = Lifeline_BleedOutTime / 2; //auto revover half way through bleedout.								
+
 
 										if ((time > _bleedouttime && _autoRecover == false || time > (_bleedouttime - _bleedout_half) && _autoRecover == true ) && lifeState _x == "INCAPACITATED") then {
 											// _autoRecover = _x getVariable "Lifeline_autoRecover";
@@ -550,6 +562,7 @@ if (isServer) then {
 												[_x, true] remoteExec ["allowDamage",_x]; //added 
 												[_x, false] remoteExec ["setCaptive",_x]; 
 												//_x allowDamage true; //added 
+
 												//added
 												// _x setVariable ["Lifeline_Down",false,true];  		// for Revive Method 2
 												_x setVariable ["Lifeline_allowdeath",false,true]; 	// for Revive Method 2
@@ -604,6 +617,7 @@ if (isServer) then {
 								_diag_text = [_x,_diag_text] call Lifeline_incap_list_HUD;
 							};
 
+
 						} foreach Lifeline_incapacitated;
 
 			[format ["<t align='right' size='0.4'>%1</t>",_diag_text],((safeZoneW - 1) * 0.48),-0.03,3,0,0,LifelinetxtdebugLayer1] spawn BIS_fnc_dynamicText;	
@@ -615,6 +629,7 @@ if (isServer) then {
 				Lifeline_deadVehicle = [];
 				{if (damage _x == 1 && simulationEnabled _x && isTouchingGround _x) then {Lifeline_deadVehicle pushBackUnique _x}} forEach vehicles;
 			};
+
 			if (_freq == 3) then {_freq = 1} else {_freq = _freq +1};	
 
 			sleep 2;
@@ -711,6 +726,7 @@ if (isServer) then {
 				};
 			} foreach Lifeline_healthy_units;
 			_diag_array = ""; {_diag_array = _diag_array + name _x + ", " } foreach Lifeline_medics2choose; 
+
 
 			_voice = "";
 

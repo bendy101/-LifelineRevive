@@ -1,33 +1,7 @@
 
 	class crawling {
 		name="crawling";
-		sound[]={"Lifeline_Revive\sound\crawling.ogg", 20, 1, 50};
-		titles[] = {};
-	};
-
-	class bepatient {
-		name="bepatient";
-		sound[]={"Lifeline_Revive\sound\bepatient.ogg", 20, 1, 50};
-		titles[] = {};
-	};
-	class medicsbusy {
-		name="medicsbusy";
-		sound[]={"Lifeline_Revive\sound\medicsbusy.ogg", 20, 1, 50};
-		titles[] = {};
-	};
-	class stopvehicle {
-		name="stopvehicle";
-		sound[]={"Lifeline_Revive\sound\stopvehicle.ogg", 20, 1, 50};
-		titles[] = {};
-	};
-	class ontheway {
-		name="ontheway";
-		sound[]={"Lifeline_Revive\sound\ontheway.ogg", 20, 1, 50};
-		titles[] = {};
-	};
-	class memberdied {
-		name="memberdied";
-		sound[]={"Lifeline_Revive\sound\memberdied.ogg", 1, 1, 50};
+		sound[]={"Lifeline_Revive\sound\errormessages\crawling.ogg", 20, 1, 50};
 		titles[] = {};
 	};
 	class diedbleedout1 {
@@ -36,18 +10,28 @@
 		titles[] = {};
 	};	
 	class beep_hi_1 {
-			name="beep_hi_1";
-			sound[]={"Lifeline_Revive\sound\Beep Standard Hi.ogg", 10, 1, 50};
-			titles[] = {};
+		name="beep_hi_1";
+		sound[]={"Lifeline_Revive\sound\errormessages\Beep Standard Hi.ogg", 10, 1, 50};
+		titles[] = {};
 	};
 	class siren1 {
 		name="siren1";
-		sound[]={"Lifeline_Revive\sound\Siren_Long.ogg", 20, 1, 50};
+		sound[]={"Lifeline_Revive\sound\errormessages\Siren_Long.ogg", 20, 1, 50};
 		titles[] = {};
 	};	
 	class siren2 {
 		name="siren2";
-		sound[]={"Lifeline_Revive\sound\Siren_Long2.ogg", 20, 1, 50};
+		sound[]={"Lifeline_Revive\sound\errormessages\Siren_Long2.ogg", 20, 1, 50};
+		titles[] = {};
+	};	
+	class teleportmedic {
+		name="teleportmedic";
+		sound[]={"Lifeline_Revive\sound\errormessages\teleportmedic2.ogg", 20, 1, 50};
+		titles[] = {};
+	};	
+	class adjust_direction {
+		name="adjust_direction";
+		sound[]={"Lifeline_Revive\sound\errormessages\adjust_direction.ogg", 20, 1, 50};
 		titles[] = {};
 	};	
 
@@ -2591,6 +2575,7 @@
 
 
 
+
 	/// TEST SOUNDS
 	class testA {
 			name="testA";
@@ -2645,9 +2630,9 @@
 		sound[]={"Lifeline_Revive\sound\errormessages\Zeusorthirdparty.ogg", 10, 1, 50};
 		titles[] = {};
 	};	
-	class LifelineBleedOutTime_not_zero {
-			name="LifelineBleedOutTime_not_zero";
-			sound[]={"Lifeline_Revive\sound\errormessages\LifelineBleedOutTime_not_zero.ogg", 10, 1, 50};
+	class BleedOutTime_not_zero {
+			name="BleedOutTime_not_zero";
+			sound[]={"Lifeline_Revive\sound\errormessages\BleedOutTime_not_zero.ogg", 10, 1, 50};
 			titles[] = {};
 		};	
 	class invincible_or_captive {

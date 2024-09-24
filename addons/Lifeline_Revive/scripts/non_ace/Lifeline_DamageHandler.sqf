@@ -3,12 +3,7 @@ params ["_unit"];
 		[[_unit],
 			{ //curely bracket start
 				params ["_unit"];
-				//================================CODE BELOW
-				_diag_text = format ["%1 | [008 Lifeline_DamageHandlerREMOTECALL.sqf] ADD DAMAGE HANDLER", name _unit]; if !(isServer) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
-				// _diag_text = format ["%1 | [008 Lifeline_DamageHandlerREMOTECALL.sqf] ADD DAMAGE HANDLER", name _unit]; if !(isServer) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
-				// _diag_text = format ["%1 | [008 Lifeline_DamageHandlerREMOTECALL.sqf] ADD DAMAGE HANDLER", name _unit]; if !(isServer) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
 				_unit removeAllEventHandlers "handleDamage";
-				[format ["%1 !!!!!!!!! REMOVE ALL DAMAGE HANDLERS !!!!!!!!!!!!!", name _unit]] remoteExec ["diag_log", 2];
 
 				//ADD Lifeline CUSTOM DAMAGE HANDLER
 				_actionId = _unit addEventHandler ["handleDamage", {
@@ -26,16 +21,6 @@ params ["_unit"];
 										_preventdeath = 0;   
 										if (Lifeline_InstantDeath == 1) then {
 											_preventdeath = _unit getVariable ["Lifeline_PreventDeath_count",0];
-											if (_preventdeath == 4) then {
-												_diag_text = format ["%1 | Lifeline_DamageHandlerREMOTECALL.sqf [0053]uuuuuuuuuuuuuuuuuuuuuuuu Lifeline_InstantDeath 1 DEAD THROUGH _preventdeath == 4 uuuuuuuuuuuuuuuuuuuuuuuuuuu", name _unit]; if !(isServer) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
-													if (Lifeline_debug_soundalert) then {		
-															[] spawn {
-															["beep_hi_1"] remoteExec ["playSound",2];sleep 0.1;
-															["beep_hi_1"] remoteExec ["playSound",2];sleep 0.1;
-															["beep_hi_1"] remoteExec ["playSound",2];sleep 0.1;
-															};
-													};
-											};
 										};
 
 										if (Lifeline_InstantDeath == 0 || Lifeline_InstantDeath == 1 && (_preventdeath < 4 && !(_hitPoint == "hithead" && _damage > 2.66))) then {
@@ -50,16 +35,11 @@ params ["_unit"];
 											if (Lifeline_InstantDeath == 1) then {_unit setVariable ["Lifeline_PreventDeath_count", _preventdeath + 1, true]}; 
 											_damage = 0.998; //there is a weird bug where a value of 0.999 will round up to 0.1 on the server, which breaks things. So better to use 0.998
 										};
-										_diag_text = format ["[042] %6 | prevent instant death 1   TOT %3 | DMG: %2 | count: %4 | allowdeath %7 | directhit %8 | timelimit %9 |PART: %1	| captive %10",_hitPoint, _damage toFixed 6, damage _unit toFixed 6,  _Lifeline_DHcount, _directHit, name _unit, (_unit getVariable ["Lifeline_allowdeath",false]), _directHit,(_unit getVariable ["LifelineBleedOutTime",0]), captive _unit ]; if !(isServer) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
-
 					};	
 
-					//===================================	
-					//just for diag_logs debugging
-					// if (damage _unit >= 1 && (_unit getVariable ["Lifeline_Down",false]) && Lifeline_InstantDeath == false) then {
 					if (_hitPoint == "" && _damage >= 1 && (_unit getVariable ["Lifeline_Down",false]) && Lifeline_InstantDeath != 3 && Lifeline_Revive_debug) then {
 						_diag_text = format ["%1 | %2 xxxxxxxxxxxxxxxxxxxx KILLED WHILE DOWN xxxxxxxxxxxxxxxxxxx", name _unit, lifestate _unit]; if !(isServer) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
-						_diag_text = format ["%1 | %2 xxxxxxxxxxxxxxxxxxxx KILLED WHILE DOWN xxxxxxxxxxxxxxxxxxx", name _unit, lifestate _unit]; if !(isServer) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
+						//_diag_text = format ["%1 | %2 xxxxxxxxxxxxxxxxxxxx KILLED WHILE DOWN xxxxxxxxxxxxxxxxxxx", name _unit, lifestate _unit]; if !(isServer) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
 					};
 
 
@@ -73,11 +53,8 @@ params ["_unit"];
 
 					//headshot version
 					if (((_damage > Lifeline_IncapThres && _hitPoint == "") ||  damage _unit > Lifeline_IncapThres  ||  ((_hitPoint == "hitface" || _hitPoint == "hitneck" || _hitPoint == "hithead") && _damage >= 0.998)) && isTouchingGround vehicle _unit && !(_unit getVariable ["Lifeline_Down",false])) then {			
-
-						// if (((_damage > Lifeline_IncapThres && _hitPoint == "") ||  damage _unit > Lifeline_IncapThres ||  _hitPoint != "hitlegs" && _hitPoint != "hithands" && _hitPoint != "hitarms" && _damage > Lifeline_IncapThres) && isTouchingGround vehicle _unit && !(_unit getVariable ["Lifeline_Down",false])) then {
-						// if (Lifeline_Revive_debug) then {diag_log format ["[144] %6 | THRUGATE 1 uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu**** TOT %3 | DMG: %2 | count: %4 | 		'", _hitPoint, _damage toFixed 6, damage _unit toFixed 6,  _Lifeline_DHcount, _directHit, name _unit]};
-						_diag_text = format ["[144] %6 | THRUGATE 1 uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu**** TOT %3 | DMG: %2 | count: %4 | 		'", _hitPoint, _damage toFixed 6, damage _unit toFixed 6,  _Lifeline_DHcount, _directHit, name _unit]; if !(isServer) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
-
+					// other version
+					// if (((_damage > Lifeline_IncapThres && _hitPoint == "") ||  damage _unit > Lifeline_IncapThres ||  _hitPoint != "hitlegs" && _hitPoint != "hithands" && _hitPoint != "hitarms" && _damage > Lifeline_IncapThres) && isTouchingGround vehicle _unit && !(_unit getVariable ["Lifeline_Down",false])) then {
 
 						_unit setCaptive true;	
 						// [_unit,true] remoteExec ["setCaptive", _unit];	
@@ -109,7 +86,6 @@ params ["_unit"];
 						if (_hitPoint == "" && _damage >= 0.999) then {
 							_damage = 0.998;
 							// _unit setVariable ["preventdeath",true,true];
-							_diag_text = format ["[042] %6 | prevent instant death 2   TOT %3 | DMG: %2 | count: %4 | allowdeath %7 | directhit %8 | timelimit %9 |PART: %1 | time:%10		",_hitPoint, _damage toFixed 6, damage _unit toFixed 6,  _Lifeline_DHcount, _directHit, name _unit, (_unit getVariable ["Lifeline_allowdeath",false]), _directHit,(_unit getVariable ["LifelineBleedOutTime",0]), time ]; if !(isServer) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
 						};							
 					};
 
@@ -120,21 +96,8 @@ params ["_unit"];
 				}]; //end DamageHandler
 				// ADD DH ID
 				_unit setVariable ["Lifeline_DH_ID",_actionId,true];
-				// if (!isPlayer _x) then {
-				// hintsilent format ["%1", name _x];
-				// };
-				/* _x addMPEventHandler ["MPKilled", {
-					params ["_unit", "_killer", "_instigator", "_useEffects"];	
-						if (Lifeline_RevProtect == 1) then {
-							if (Lifeline_debug_soundalert) then {["siren1"] remoteExec ["playSound",2];[selectRandom["memberdied1","memberdied2","memberdied3","memberdied4","memberdied5"]] remoteExec ["playSound",2];};
-						};
-						[_unit,"KILLED"] remoteExec ["serverSide_unitstate", 2];
-						["KILLED"] remoteExec ["serverSide_Globals", 2]
-				}];
-					 */				
-				//================================FINISH CODE		
+
 			} //end curly bracket
 		// ] remoteExec ["call", _unit, true];
 		] remoteExec ["call", 0, true];
-	if (Lifeline_Revive_debug && !isPlayer _unit) then {[_unit,"Lifeline_DamageHandlerREMOTECALL.sqf"] remoteExec ["serverSide_unitstate", 2]}; // '2' indicates execution on the server
-	if (Lifeline_Revive_debug && isPlayer _unit) then {[_unit,"PLAYER Lifeline_DamageHandlerREMOTECALL.sqf"] remoteExec ["serverSide_unitstate", 2]}; // '2' indicates execution on the server
+

@@ -26,7 +26,6 @@
 		[_player, true] remoteExec ["allowDamage",_player];
 		[_player, false] remoteExec ["setCaptive",_player]; 
 		// _player setcaptive false;_player allowDamage true; 
-		if !(local _player) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
 	};
 
 
@@ -34,7 +33,6 @@
 		[_player, true] remoteExec ["allowDamage",_player];
 		[_player, false] remoteExec ["setCaptive",_player]; 
 		// _player setcaptive false;_player allowDamage true; 
-		if !(local _player) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
 	};
 
 
@@ -42,7 +40,6 @@
 		[_player, true] remoteExec ["allowDamage",_player];
 		[_player, false] remoteExec ["setCaptive",_player]; 
 		// _player setcaptive false;_player allowDamage true; 
-		if !(local _player) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
 	};
 
 
@@ -121,11 +118,11 @@
 			_text = "";
 			_damagesubtract = _incap getVariable ["damagesubstr",0];		
 			_bandages = _incap getVariable ["num_bandages",0];
+
 			if (_bandages == 0 or (lifestate _incap !="INCAPACITATED")) exitWith {
 				_player setcaptive false;  
 				_player allowDamage true; 
 				_exit = true;
-				if !(local _player) then {[_diag_text] remoteExec ["diag_log", 2];} else {diag_log _diag_text};
 			};
 			_newdamage = damage _incap - _damagesubtract; // added a 0.000001 just to make sure 
 			_bandages = _bandages - 1;
@@ -213,7 +210,7 @@
 
 		// just in case another AI is reviving at same time, this will prevent double firing of wake up animation
 		if (alive _incap && ((animationState _incap find "unconscious" == 0 && animationState _incap != "unconsciousrevivedefault" && animationState _incap != "unconsciousoutprone") || animationState _incap == "unconsciousrevivedefault")) then {
-		[_incap, "unconsciousrevivedefault"] remoteExec ["SwitchMove", 0];
+			[_incap, "unconsciousrevivedefault"] remoteExec ["SwitchMove", 0];
 		};
 
 
