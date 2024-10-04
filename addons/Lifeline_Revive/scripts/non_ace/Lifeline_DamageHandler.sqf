@@ -56,7 +56,7 @@ params ["_unit"];
 					// other version
 					// if (((_damage > Lifeline_IncapThres && _hitPoint == "") ||  damage _unit > Lifeline_IncapThres ||  _hitPoint != "hitlegs" && _hitPoint != "hithands" && _hitPoint != "hitarms" && _damage > Lifeline_IncapThres) && isTouchingGround vehicle _unit && !(_unit getVariable ["Lifeline_Down",false])) then {
 
-						_unit setCaptive true;	
+						// _unit setCaptive true;	
 						// [_unit,true] remoteExec ["setCaptive", _unit];	
 
 						// _BleedOut = (time + round Lifeline_BleedOutTime); //this in Lifeline_Incapped now

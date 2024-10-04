@@ -18,15 +18,15 @@ Debug_reviveinprogress1dmgfalse = true;
 
 
 
-// if (isServer) then {
+// if (isServer) then {group _medic setSpeedMode "LIMITED";
 
 	serverSide_unitstate = {
 		params ["_unit","_line"];
 		diag_log format ["%2 | %1 !!!!!!!!SERV | ==================================================================================================='",_line, name _unit];
-		diag_log format ["%2 | %1 !!!!!!!!SERV | dmg: %3 | state: %4 | dmg_allwd: %5 | Captive: %6 | '",_line, name _unit, damage _unit, lifestate _unit, isDamageAllowed _unit, captive _unit];
-		diag_log format ["%2 | %1 !!!!!!!!SERV | Lifeline_Side: %3 | Lifeline_Down: %4 | Lifeline_allowdeath: %5 | ReviveInProgress: %6'",_line, name _unit, Lifeline_Side, (_unit getVariable ["Lifeline_Down","NONE"]), (_unit getVariable ["Lifeline_allowdeath","NONE"]), (_unit getVariable ["ReviveInProgress",0])];
+		diag_log format ["%2 | %1 !!!!!!!!SERV | dmg: %3 | state: %4 | dmg_allwd: %5 | Captive: %6 | Rating: %7 | GroupSpeed: %8'",_line, name _unit, damage _unit, lifestate _unit, isDamageAllowed _unit, captive _unit, rating _unit, speedMode (group _unit)];
+		diag_log format ["%2 | %1 !!!!!!!!SERV | Unit Side: %3 | Group Side: %7 | Lifeline_Down: %4 | Lifeline_allowdeath: %5 | ReviveInProgress: %6'",_line, name _unit, side _unit, (_unit getVariable ["Lifeline_Down","NONE"]), (_unit getVariable ["Lifeline_allowdeath","NONE"]), (_unit getVariable ["ReviveInProgress",0]), side (group _unit)];
 		diag_log format ["%2 | %1 !!!!!!!!SERV | Lifeline_All_Units: %3 | Lifeline_Process: %6 | Lifeline_incapacitated: %4 | Lifeline_medics: %5'",_line, name _unit, (_unit in Lifeline_All_Units), (_unit in Lifeline_incapacitated), (_unit in Lifeline_medics), (_unit in Lifeline_Process)];
-		diag_log format ["%2 | %1 !!!!!!!!SERV | Lifeline_countdown_start: %3 | Lifeline_canceltimer: %4'",_line, name _unit, (_unit getVariable ["Lifeline_countdown_start","NONE"]), (_unit getVariable ["Lifeline_canceltimer","NONE"])];
+		diag_log format ["%2 | %1 !!!!!!!!SERV | Lifeline_countdown_start: %3 | Lifeline_canceltimer: %4 | unitPos stance: %5'",_line, name _unit, (_unit getVariable ["Lifeline_countdown_start","NONE"]), (_unit getVariable ["Lifeline_canceltimer","NONE"]), UnitPos _unit];
 		diag_log format ["%2 | %1 !!!!!!!!SERV | Lifeline_AssignedMedic:%4 | AnimationState:%3 | Lifeline_selfheal_progss:%5'",_line, name _unit, animationstate _unit, name (_unit getVariable ["Lifeline_AssignedMedic",[]] select 0), _unit getVariable ["Lifeline_selfheal_progss",false]];
 
 		_bleedout = (_unit getVariable ["LifelineBleedOutTime",0]);
@@ -59,7 +59,7 @@ Debug_reviveinprogress1dmgfalse = true;
 		_type = "RADIOPROTOCOL";if !(_unit checkAIFeature _type) then {_text17 = _type + " "}; 
 		//_type = "FIREWEAPON";  if (_unit checkAIFeature _type) then {_text18 = _type + " "}; 
 		_alltext = _text1+_text2+_text3+_text4+_text5+_text6+_text7+_text8+_text9+_text10+_text11+_text12+_text13+_text14+_text15+_text16+_text17+_text18;  
-		diag_log format ["%2 | %1 !!!!!!!!SERV | Fleeing: %4 | Supprssion: %5 | moveToCompleted %6 | AI feat missing: %3'",_line, name _unit, _alltext, fleeing _unit, getSuppression _unit, moveToCompleted _unit];
+		diag_log format ["%2 | %1 !!!!!!!!SERV | Fleeing: %4 | Supprssion: %5 | moveToCompleted: %6 | Behaviour: %7 | CombatMode: %8 | AI feat missing: %3 '",_line, name _unit, _alltext, fleeing _unit, getSuppression _unit, moveToCompleted _unit, behaviour _unit, combatMode (group _unit)];
 		diag_log format ["%2 | %1 !!!!!!!!SERV | ==================================================================================================='",_line, name _unit];
 	};
 
@@ -79,12 +79,15 @@ Debug_reviveinprogress1dmgfalse = true;
 	serverSide_MissionSettings = { 
 		diag_log format ["!!!! Lifeline_Scope | %1 !!!!'", Lifeline_Scope];
 		diag_log format ["!!!! Lifeline_RevProtect | %1 !!!!'", Lifeline_RevProtect];
-		diag_log format ["!!!! Lifeline_BandageLimit | %1 !!!!'", Lifeline_BandageLimit];
-		diag_log format ["!!!! Lifeline_BleedOutTime | %1 !!!!'", Lifeline_BleedOutTime];
-		diag_log format ["!!!! Lifeline_InstantDeath | %1 !!!!'", Lifeline_InstantDeath];
-		diag_log format ["!!!! Lifeline_autoRecover | %1 !!!!'", Lifeline_autoRecover];
-		diag_log format ["!!!! Lifeline_CPR_likelihood | %1 !!!!'", Lifeline_CPR_likelihood];
-		diag_log format ["!!!! Lifeline_CPR_less_bleedouttime | %1 !!!!'", Lifeline_CPR_less_bleedouttime];
+		if (Lifeline_ACEcheck_ == false) then {
+			diag_log format ["!!!! Lifeline_BandageLimit | %1 !!!!'", Lifeline_BandageLimit];
+			diag_log format ["!!!! Lifeline_BleedOutTime | %1 !!!!'", Lifeline_BleedOutTime];
+			diag_log format ["!!!! Lifeline_InstantDeath | %1 !!!!'", Lifeline_InstantDeath];
+			diag_log format ["!!!! Lifeline_autoRecover | %1 !!!!'", Lifeline_autoRecover];
+			diag_log format ["!!!! Lifeline_CPR_likelihood | %1 !!!!'", Lifeline_CPR_likelihood];
+			diag_log format ["!!!! Lifeline_CPR_less_bleedouttime | %1 !!!!'", Lifeline_CPR_less_bleedouttime];
+			diag_log format ["!!!! Lifeline_IncapThres | %1 !!!!'", Lifeline_IncapThres];
+		};
 		diag_log format ["!!!! Lifeline_SmokeColour | %1 !!!!'", Lifeline_SmokeColour];
 		diag_log format ["!!!! Lifeline_radio | %1 !!!!'", Lifeline_radio];
 		diag_log format ["!!!! Lifeline_MedicComments | %1 !!!!'", Lifeline_MedicComments];
@@ -97,7 +100,6 @@ Debug_reviveinprogress1dmgfalse = true;
 			diag_log format ["!!!! Lifeline_ACE_Bandage_Method | %1 !!!!'", Lifeline_ACE_Bandage_Method];
 			diag_log format ["!!!! Lifeline_ACE_Blackout | %1 !!!!'", Lifeline_ACE_Blackout];
 		};
-		diag_log format ["!!!! Lifeline_IncapThres | %1 !!!!'", Lifeline_IncapThres];
 		diag_log format ["!!!! Lifeline_Revive_debug | %1 !!!!'", Lifeline_Revive_debug];
 		diag_log format ["!!!! Lifeline_ACE_Bandage_Method | %1 !!!!'", Lifeline_ACE_Bandage_Method];
 		diag_log format ["!!!! Lifeline_Idle_Medic_Stop | %1 !!!!'", Lifeline_Idle_Medic_Stop];
@@ -291,9 +293,9 @@ params ["_x"];
 								sleep 5;
 								if (alive _x && lifestate _x == "INCAPACITATED" && captive _x == false && Lifeline_RevProtect != 3) then {
 								//hackfix here...
-								// if (isDedicated) then {
-								 // [_x,true] remoteExec ["setCaptive", _x]; 
-								// };
+								if (isDedicated) then {
+								 [_x,true] remoteExec ["setCaptive", _x]; 
+								};
 								_secs = (_x getVariable ["LifelinePairTimeOut",0]) - time;
 								diag_log format ["%1 Captive turned off when down uuuuuuuuuu BUG uuuuuuuuuu AssignedMedic:%2, ReviveInProgress %4, secs: %3'", name _x, (_x getVariable ["Lifeline_AssignedMedic",[]] select 0), _secs, (_x getVariable ["ReviveInProgress",0])];
 								diag_log format ["%1 Captive turned off when down uuuuuuuuuu BUG uuuuuuuuuu AssignedMedic:%2, ReviveInProgress %4, secs: %3'", name _x, (_x getVariable ["Lifeline_AssignedMedic",[]] select 0), _secs, (_x getVariable ["ReviveInProgress",0])];
@@ -304,9 +306,7 @@ params ["_x"];
 								["siren1"] remoteExec ["playSound",Debug_to];
 								};
 						};
-					};					
-
-
+					};	
 };
 
 

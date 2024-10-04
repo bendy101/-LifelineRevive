@@ -13,7 +13,10 @@ diag_log "======================================================================
 	Lifeline_hintsilent = true;
 	Lifeline_debug_soundalert = true;
 	Lifeline_HUD_names_pairtime = true;
-	Lifeline_DEH_CallMethod = 2;	// 1 = "remoteexec ['addeventhandler', _x] (Default)",
+	Lifeline_Idle_Crouch_Speed = 0; // the speed of a unit to consider "idle". Between 0 - 5.
+
+	Lifeline_travel_meth = 1; //TEMP TEST. animation method for medic just before arriving at incap. 0 is normal without using stance. 1 is using stance (prone)
+	// 1 = "remoteexec ['addeventhandler', _x] (Default)",
 	// 2 = "remoteExec ['call'] curley brackets {}", 
 	// 3 = "remoteExec FNC ['Lifeline_custom_DamageH'", 
 	// 4 = "remoteExec CALL FNC ['Lifeline_custom_DamageH'"

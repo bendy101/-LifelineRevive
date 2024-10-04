@@ -12,6 +12,7 @@ diag_log "======================================================================
 Lifeline_Incapped = {
 	params ["_unit","_damage","_non_handler"];
 	// _non_handler is a boolean. if true it means incapped function was called NOT through the damage handler.
+	_unit setCaptive true;	
 
 	Lifeline_incapacitated pushBackUnique _unit;
 	publicVariable "Lifeline_incapacitated";
@@ -508,20 +509,21 @@ Lifeline_bandage_addAction = {
 		} else {
 		_randomNumber = floor (random 101);
 	};		
-	if ((Lifeline_InstantDeath == 0 && damage _unit >= 0.998 && _randomNumber <= Lifeline_CPR_likelihood) || (Lifeline_InstantDeath == 1 && damage _unit > 0.97 && _randomNumber <= Lifeline_CPR_likelihood) || (Lifeline_InstantDeath == 2 && damage _unit > 0.97 )) then {											
-	// if (damage _unit >= 0.998) then {		// for testing									
-		_cpr = true;
-		//turn of autorevive
-		_unit setVariable ["Lifeline_autoRecover",false,true];	
-		if (Lifeline_CPR_less_bleedouttime != 100) then {
-			_bleedouttime = _unit getVariable ["LifelineBleedOutTime", 0];
-			// _bleedouttime = _bleedouttime - (Lifeline_BleedOutTime / 3);
-			// _bleedouttime = _bleedouttime - (Lifeline_BleedOutTime * (Lifeline_CPR_less_bleedouttime / 100));
-			_bleedouttime = time + (Lifeline_BleedOutTime * (Lifeline_CPR_less_bleedouttime / 100));
-			_unit setVariable ["LifelineBleedOutTime", _bleedouttime, true];
+	if (Lifeline_CPR_likelihood > 0) then {
+		if ((Lifeline_InstantDeath == 0 && damage _unit >= 0.998 && _randomNumber <= Lifeline_CPR_likelihood) || (Lifeline_InstantDeath == 1 && damage _unit > 0.97 && _randomNumber <= Lifeline_CPR_likelihood) || (Lifeline_InstantDeath == 2 && damage _unit > 0.97 )) then {											
+		// if (damage _unit >= 0.998) then {		// for testing									
+			_cpr = true;
+			//turn of autorevive
+			_unit setVariable ["Lifeline_autoRecover",false,true];	
+			if (Lifeline_CPR_less_bleedouttime != 100) then {
+				_bleedouttime = _unit getVariable ["LifelineBleedOutTime", 0];
+				// _bleedouttime = _bleedouttime - (Lifeline_BleedOutTime / 3);
+				// _bleedouttime = _bleedouttime - (Lifeline_BleedOutTime * (Lifeline_CPR_less_bleedouttime / 100));
+				_bleedouttime = time + (Lifeline_BleedOutTime * (Lifeline_CPR_less_bleedouttime / 100));
+				_unit setVariable ["LifelineBleedOutTime", _bleedouttime, true];
+			};
 		};
 	};
-
 	if !(_cpr) then {
 		_unit setVariable ["LifelineBleedOutTime", time + Lifeline_BleedOutTime, true]; //add again to start fresh.
 	};
@@ -796,7 +798,22 @@ Lifeline_Medic_Anim_and_Revive = {
 						_crouchreviveanim = 0;
 
 						// if (lifestate _medic != "INCAPACITATED" || (alive _medic) || lifestate _incap == "INCAPACITATED" || (alive _incap)) then { 
-						if (lifestate _medic != "INCAPACITATED" && alive _medic) then {_medic setdir (_medic getDir _incap);/*  */};
+					/* 	if (lifestate _medic != "INCAPACITATED" && alive _medic) then {
+							// _medic setdir (_medic getDir _incap); //TEMPOFF yeha
+							// playsound "forcedirection";
+							_checkdegrees = [_incap,_medic,25] call Lifeline_checkdegrees;
+							if (_checkdegrees == false) then {
+								[_medic,_incap] call Lifeline_align_dir;
+								if (Lifeline_debug_soundalert && Lifeline_Revive_debug) then {playsound "adjust_direction"};
+								if (Lifeline_hintsilent && Lifeline_Revive_debug) then {hint format ["%1 ADJUST DIRECTION ", name _medic]};
+							};			
+							_medic disableAI "ANIM";
+							_checkdegrees = [_incap,_medic,15] call Lifeline_checkdegrees;
+							 // if (_checkdegrees == false) then {
+								// sleep 3;
+								// _medic setDir (_medic getDir _incap);playsound "forcedirection";
+							// };							
+						}; */
 
 						if (_part_yo != "CPR") then {
 								// Kneeling revive - no near enemy
@@ -1006,6 +1023,7 @@ _exit
 //new animation for bandage loop without pulling out weapon after each animation
 Lifeline_Anim_Bandage_new = {
 	params ["_incap","_medic","_randomanimloop","_cprcheck"];
+	//AinvPpneMstpSlayWnonDnon_medicOther  for use later. For no weapon characters.
 
 	if (_randomanimloop == 1) then {		
 		if (_cprcheck == true) then {  // to smooth animation if CPR animation was prevously
@@ -1063,6 +1081,8 @@ Lifeline_Anim_Bandage_new = {
 
 
 
+
+
 Lifeline_autoRecover_check = {
 	params ["_unit"];				
 	_percentchance = Lifeline_autoRecover;
@@ -1079,6 +1099,66 @@ Lifeline_autoRecover_check = {
 		false
 	};
 };
+
+
+
+Lifeline_countdown_timer2 = {
+	params ["_unit","_seconds"];
+
+	_bleedout = (_unit getVariable "LifelineBleedOutTime");
+	_realseconds = round(_bleedout - time); // to adjust exactly	
+	_counter = _realseconds;
+	_colour = "#FFFAF8";	
+	// _font = Lifelinefonts select Lifeline_HUD_dist_font;//added for distance
+
+	while {_counter >= 0 && lifeState _unit == "INCAPACITATED"} do {
+
+		if (_unit getVariable ["Lifeline_canceltimer",false]) exitWith {/*_unit setVariable ["Lifeline_canceltimer",false,true]; */};
+
+		if (time > (_bleedout - (Lifeline_cntdwn_disply+3)) && Lifeline_RevMethod == 2) then {
+
+			// if (_counter <= 60 && isPlayer _unit) then {_colour = "#A10A0A"};
+			if (_counter <= 60 && isPlayer _unit) then {_colour = "#EF5736"};
+			if (_counter <= 10 && isPlayer _unit) then {_colour = "#FF0000";playSound "beep_hi_1";};
+			if (isPlayer _unit && _counter <= _seconds) then { 
+					[format ["<t align='right' size='%3' color='%1'>..%2</t><br>..<br>..",_colour,_counter,0.7],((safeZoneW - 1) * 0.48),1.3,5,0,0,Lifelinetxt2Layer] spawn BIS_fnc_dynamicText;
+					// [format ["<t align='right' size='%3' color='%1'>..%2</t><br>..<br>..",_colour,_counter,0.7],((safeZoneW - 1) * 0.48),1.3,1,0,0,LifelineBleedoutLayer] spawn BIS_fnc_dynamicText;
+			};			
+		};	
+
+		//========================= ADDED distance
+		if (Lifeline_HUD_distance) then {
+			_AssignedMedic = (_unit getVariable ["Lifeline_AssignedMedic",[]]); 
+			if (_AssignedMedic isNotEqualTo []) then {
+				_incap = _unit;
+				_medic = _AssignedMedic select 0;
+				_distcalc = _medic distance2D _incap;
+				if (isPlayer _incap && _distcalc > 10) then {
+					// [format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",_font],((safeZoneW - 1) * 0.48),1.26,3,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
+					   [format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",Lifeline_HUD_dist_font],((safeZoneW - 1) * 0.48),1.26,3,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
+					// [format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",_font],((safeZoneW - 1) * 0.48),1.26,5,0,0,LifelineDistLayer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
+				};
+				if (isPlayer _incap && (_distcalc <= 10 && _distcalc >= 5 ) && Lifeline_HUD_distance) then {
+					// ["",0.64,1.26,5,0,0,Lifelinetxt1Layer] remoteExec ["BIS_fnc_dynamicText",_incap];
+					["",0.64,1.26,5,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText;
+					// ["",0.64,1.26,5,0,0,LifelineDistLayer] remoteExec ["BIS_fnc_dynamicText",_incap];
+				};			
+			};	
+		};
+		//last 3 are just counter instead of calc time
+		if (_counter < 4) then {
+			_counter = _counter - 1;
+		} else { 
+			// _counter = round(_bleedout - time);
+			_counter = round((_unit getVariable "LifelineBleedOutTime") - time);
+		};
+		sleep 1;
+	}; // end while
+
+	// _unit setVariable ["Lifeline_canceltimer",false,true];
+	_unit setVariable ["Lifeline_countdown_start",false,true];
+};
+
 
 
 
@@ -1124,40 +1204,6 @@ Lifeline_radio_how_copy = {
 
 
 
-reset_idle_medics = {
-    params ["_unit"];
-
-    // Remove all waypoints
-    {
-        deleteWaypoint _x;
-    } forEach waypoints (group _unit);
-
-    // Reset position and direction
-    _unit setPos (position _unit);
-    _unit setDir (direction _unit);
-
-    // Reset skill
-    // _unit setSkill ["aimingAccuracy", 0.5];
-    // _unit setSkill ["aimingShake", 0.5];
-    // _unit setSkill ["aimingSpeed", 0.5];
-    // _unit setSkill ["endurance", 0.5];
-    // _unit setSkill ["spotDistance", 0.5];
-    // _unit setSkill ["spotTime", 0.5];
-    _unit setSkill ["courage", 1];
-    // _unit setSkill ["reloadSpeed", 0.5];
-    // _unit setSkill ["commanding", 0.5];
-    // _unit setSkill ["general", 0.5];
-
-    // Reset behaviour
-    _unit setBehaviour "SAFE";
-    _unit setCombatMode "YELLOW";
-    _unit setSpeedMode "LIMITED";
-    _unit disableAI "ALL";
-	sleep 0.1;
-    _unit enableAI "ALL";
-	sleep 0.1;
-	if (Lifeline_Revive_debug) then {[_unit,"IDLE MEDIC reset_idle_medics [Lifeline_Functions.sqf]"] call serverSide_unitstate;};
-};
 
 
 

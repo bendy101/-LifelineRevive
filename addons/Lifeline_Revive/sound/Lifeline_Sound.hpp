@@ -33,6 +33,26 @@
 		name="adjust_direction";
 		sound[]={"Lifeline_Revive\sound\errormessages\adjust_direction.ogg", 20, 1, 50};
 		titles[] = {};
+	};		
+	class forcedirection {
+		name="forcedirection";
+		sound[]={"Lifeline_Revive\sound\errormessages\forcedirection2.ogg", 20, 1, 50};
+		titles[] = {};
+	};	
+	class shortdistance {
+		name="shortdistance";
+		sound[]={"Lifeline_Revive\sound\errormessages\shortdistance.ogg", 20, 1, 50};
+		titles[] = {};
+	};	
+	class speediszero {
+		name="speediszero";
+		sound[]={"Lifeline_Revive\sound\errormessages\speediszero.ogg", 20, 1, 50};
+		titles[] = {};
+	};	
+	class overshoot {
+		name="overshoot";
+		sound[]={"Lifeline_Revive\sound\errormessages\overshoot2.ogg", 20, 1, 50};
+		titles[] = {};
 	};	
 
 //===================== Dave		

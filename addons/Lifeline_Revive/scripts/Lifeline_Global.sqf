@@ -43,64 +43,6 @@ _exit
 
 
 
-Lifeline_countdown_timer2 = {
-	params ["_unit","_seconds"];
-
-	_bleedout = (_unit getVariable "LifelineBleedOutTime");
-	_realseconds = round(_bleedout - time); // to adjust exactly	
-	_counter = _realseconds;
-	_colour = "#FFFAF8";	
-	// _font = Lifelinefonts select Lifeline_HUD_dist_font;//added for distance
-
-	while {_counter >= 0 && lifeState _unit == "INCAPACITATED"} do {
-
-		if (_unit getVariable ["Lifeline_canceltimer",false]) exitWith {/*_unit setVariable ["Lifeline_canceltimer",false,true]; */};
-
-		if (time > (_bleedout - (Lifeline_cntdwn_disply+3)) && Lifeline_RevMethod == 2) then {
-
-			// if (_counter <= 60 && isPlayer _unit) then {_colour = "#A10A0A"};
-			if (_counter <= 60 && isPlayer _unit) then {_colour = "#EF5736"};
-			if (_counter <= 10 && isPlayer _unit) then {_colour = "#FF0000";playSound "beep_hi_1";};
-			if (isPlayer _unit && _counter <= _seconds) then { 
-					[format ["<t align='right' size='%3' color='%1'>..%2</t><br>..<br>..",_colour,_counter,0.7],((safeZoneW - 1) * 0.48),1.3,5,0,0,Lifelinetxt2Layer] spawn BIS_fnc_dynamicText;
-					// [format ["<t align='right' size='%3' color='%1'>..%2</t><br>..<br>..",_colour,_counter,0.7],((safeZoneW - 1) * 0.48),1.3,1,0,0,LifelineBleedoutLayer] spawn BIS_fnc_dynamicText;
-			};			
-		};	
-
-		//========================= ADDED distance
-		if (Lifeline_HUD_distance) then {
-			_AssignedMedic = (_unit getVariable ["Lifeline_AssignedMedic",[]]); 
-			if (_AssignedMedic isNotEqualTo []) then {
-				_incap = _unit;
-				_medic = _AssignedMedic select 0;
-				_distcalc = _medic distance2D _incap;
-				if (isPlayer _incap && _distcalc > 10) then {
-					// [format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",_font],((safeZoneW - 1) * 0.48),1.26,3,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
-					   [format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",Lifeline_HUD_dist_font],((safeZoneW - 1) * 0.48),1.26,3,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
-					// [format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",_font],((safeZoneW - 1) * 0.48),1.26,5,0,0,LifelineDistLayer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
-				};
-				if (isPlayer _incap && (_distcalc <= 10 && _distcalc >= 5 ) && Lifeline_HUD_distance) then {
-					// ["",0.64,1.26,5,0,0,Lifelinetxt1Layer] remoteExec ["BIS_fnc_dynamicText",_incap];
-					["",0.64,1.26,5,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText;
-					// ["",0.64,1.26,5,0,0,LifelineDistLayer] remoteExec ["BIS_fnc_dynamicText",_incap];
-				};			
-			};	
-		};
-		//last 3 are just counter instead of calc time
-		if (_counter < 4) then {
-			_counter = _counter - 1;
-		} else { 
-			// _counter = round(_bleedout - time);
-			_counter = round((_unit getVariable "LifelineBleedOutTime") - time);
-		};
-		sleep 1;
-	}; // end while
-
-	// _unit setVariable ["Lifeline_canceltimer",false,true];
-	_unit setVariable ["Lifeline_countdown_start",false,true];
-};
-
-
 
 // List of all incapped units and assigned medics in HUD. Needs to be used with "foreach"
 Lifeline_incap_list_HUD = {
@@ -119,15 +61,20 @@ params ["_x","_diag_text"];
 
 		if (lifestate _x == "INCAPACITATED" || !(alive _x)) then {
 				_colur = "#FFBFA7"; //pinkish
-				if (Lifeline_RevMethod == 2 && Lifeline_BandageLimit > 1 && Lifeline_HUD_names in [2,4]) then {
-					_bandges = (_x getVariable ["num_bandages",0]);
-					if (_bandges != 0) then {
-						// _no = " (" + str _bandges + ")";
-						_no = "  " + str _bandges;
-						// _no = "<t color='#ffffff'> ("+str _bandges+")</t>";
-					} else {
-						_no = " "; 
-					};
+				if (Lifeline_RevMethod == 2) then {
+					if (Lifeline_BandageLimit > 1 && Lifeline_HUD_names in [2,4]) then {
+						_bandges = (_x getVariable ["num_bandages",0]);
+						if (_bandges != 0) then {
+							// _no = " (" + str _bandges + ")";
+							// _no = "<t size='0.3'> ("+str _bandges+")</t>";
+							// _no = "  " + str _bandges;
+							_no = "<t size='0.3'>  "+str _bandges+" </t>";
+							// _no = "<t color='#ffffff'> ("+str _bandges+")</t>";
+							 // _no = "<t color='#ffffff' size='0.3'> ("+str _bandges+")</t>";
+						} else {
+							_no = " "; 
+						};
+					};	
 				};
 		};
 		if (isPlayer _x) then {_underline = "underline='1'";};
@@ -156,10 +103,12 @@ params ["_x","_diag_text"];
 					_distcalc = "";
 				};
 				if (isPlayer _x) then {_underline2 = "underline='1'";};
-				_medics = _medics + (format ["<t color='%1' %2>", _colur2,_underline2]) + name _x + " " + _distcalc + _tme + "</t>   ";
+				// _medics = _medics + (format ["<t color='%1' %2>", _colur2,_underline2]) + name _x + " " + _distcalc + _tme + "</t>   ";
+				_medics = _medics + (format ["<t color='%1' %2>", _colur2,_underline2]) + name _x + " " + "<t size='0.3'>" +_distcalc + _tme + "</t></t>   ";
 			} foreach _medic;
 
 			_diag_text = _diag_text + (format ["<t color='%1' %2>", _colur,_underline]) + name _x + _no + "</t> - "  + _medics + "<br />";
+			// _diag_text = _diag_text + (format ["<t color='%1' %2>", _colur,_underline]) + _no + " " + name _x + "</t> - "  + _medics + "<br />";
 		};
 _diag_text
 };
@@ -224,6 +173,8 @@ params ["_incap", "_medic", "_distnextto"];
 	// Step 1: Get the positions of the units
 	_posA = getPos _incap;
 	_posB = getPos _medic;
+	// _posA = getPosASL _incap;
+	// _posB = getPosASL _medic;
 	// Step 2: Calculate the direction vector from _unitA to _unitB
 	_directionVector = _posB vectorDiff _posA;
 	// Step 3: Normalize the direction vector
@@ -287,16 +238,20 @@ Lifeline_reset2 = {
 				publicVariable "Lifeline_Process";
 			};
 
-			_x enableAI "ANIM";
+			// _x enableAI "ANIM";
 			_x enableAI "MOVE";
 			_x enableAI "AUTOTARGET";
 			_x enableAI "AUTOCOMBAT";
 			_x enableAI "SUPPRESSION";
 			_x enableAI "TARGET";
 			group _x setSpeedMode "NORMAL";
+			_x limitSpeed 100;
 			_x doWatch objNull;
 			doStop _x; //ADDED 
+			// joinSilent deletes Teamcolour, so workaround here.
+			_teamcolour = assignedTeam _x;
 			[_x] joinSilent _x;
+			_x assignTeam _teamcolour;
 
 			if (alive leader _x && lifestate leader _x != "incapacitated") then {
 				_x doFollow leader _x;
@@ -308,23 +263,23 @@ Lifeline_reset2 = {
 			};
 			if (isplayer _x && alive _x && lifestate _x != "INCAPACITATED") then {
 				[group _x, _x] remoteExec ["selectLeader", groupOwner group _x];
-				{[_x] joinSilent group _x;} foreach units group _x;
+				{_teamcolour = assignedTeam _x;[_x] joinSilent group _x;_x assignTeam _teamcolour;} foreach units group _x; // joinSilent deletes Teamcolour, so workaround here.
 			};
 
 			// fix animation if animation if incap but unit is healthy
-			// if (lifestate _x != "INCAPACITATED" && lifestate _x != "DEAD" && lifestate _x != "DEAD-RESPAWN" && (animationState _x find "unconscious" == 0 && animationState _x != "unconsciousrevivedefault" && animationState _x != "unconsciousoutprone")) then {
 			if (lifestate _x != "INCAPACITATED" && alive _x && (animationState _x find "unconscious" == 0 && animationState _x != "unconsciousrevivedefault" && animationState _x != "unconsciousoutprone")) then {
 					[_x, "unconsciousrevivedefault"] remoteExec ["SwitchMove", 0];
 			};
+
 			//this should be completely turned off. 
 			if (lifestate _x != "INCAPACITATED") then { 
-			// if !(local _x) then {
-				// [_x, true] remoteExec ["allowDamage",_x];
-				// [_x, false] remoteExec ["setCaptive",_x];
-			// } else {
-				_x allowDamage true;
-				_x setCaptive false; 
-			// };		
+				if !(local _x) then {
+					[_x, true] remoteExec ["allowDamage",_x];
+					[_x, false] remoteExec ["setCaptive",_x];
+				} else {
+					_x allowDamage true;
+					_x setCaptive false; 
+				};		
 			};	
 		};	//if (alive _x) then 
 	} forEach _units;
@@ -366,18 +321,11 @@ Lifeline_SelfHeal = {
 			_unit setdamage 0;
 		};		
 	};
-	// if (Lifeline_RevMethod != 3) then {
-		// _unit setVariable ["Lifeline_selfheal_progss",false,true];
-	// };
 
 	if (alive _unit && lifeState _unit != "INCAPACITATED" && Lifeline_RevMethod == 3 && (isnull (objectParent _unit))) then {
 		[_unit] call Lifeline_SelfHeal_ACE;
 	};
 	_unit setVariable ["Lifeline_selfheal_progss",false,true];
-	// if (_unit getVariable ["ReviveInProgress",0] == 1) then {
-		// _revivePosX = _incap getVariable ["Lifeline_RevPosX",_revivePos];
-		// [[_unit],"[466 Lifeline_SelfHeal]"] call Lifeline_reset2;	
-	// };
 
 	true
 };
@@ -409,10 +357,15 @@ Lifeline_PairLoop = {
 		};
 
 		_distcalc = _medic distance2D _incap;
+		if (animationstate _medic in ["aidlpercmstpsraswrfldnon_g01","aidlpercmstpsraswrfldnon_g02","aidlpercmstpsraswrfldnon_g03",
+				"aidlpercmstpsraswrfldnon_g04","amovpknlmstpslowwrfldnon","aidlpercmstpsraswrfldnon_ai"]) then {
+		};
+		if (speed _medic == 0) then {
+		};
 
 		// THIS IS TO STOP IDLE MEDICS. SOMETIMES HAPPENS.
-		if (Lifeline_Idle_Medic_Stop && animationstate _medic in ["aidlpercmstpsraswrfldnon_g01","aidlpercmstpsraswrfldnon_g02","aidlpercmstpsraswrfldnon_g03",
-				"aidlpercmstpsraswrfldnon_g04","amovpknlmstpslowwrfldnon","aidlpercmstpsraswrfldnon_ai"] || _repeatcount != 6) then { 
+		// if (Lifeline_Idle_Medic_Stop && (animationstate _medic in ["aidlpercmstpsraswrfldnon_g01","aidlpercmstpsraswrfldnon_g02","aidlpercmstpsraswrfldnon_g03","aidlpercmstpsraswrfldnon_g04","amovpknlmstpslowwrfldnon","aidlpercmstpsraswrfldnon_ai"] || _repeatcount != 6)) then { 
+		if (Lifeline_Idle_Medic_Stop && (speed _medic == 0 || _repeatcount != 6) && (_medic getVariable ["ReviveInProgress",0] == 1) && _distcalc > 6) then { 
 			if (_repeatcount < 4) then { // just beep for debugging
 				if (Lifeline_Revive_debug) then {
 					if (Lifeline_hintsilent) then {hintsilent format ["%1 IDLE MEDIC %2", name _medic, _repeatcount]}; 
@@ -440,7 +393,7 @@ Lifeline_PairLoop = {
 		 //check for closer medic
 		 _closermedic_dist = 100;
 		if (_distcalc > _closermedic_dist ) then {
-		 // if (_distcalc > 100 ) then {
+
 			 Lifeline_healthy_units = Lifeline_All_Units - Lifeline_incapacitated;
 			 // Lifeline_medics2choose = (Lifeline_healthy_units select {!(side _x == civilian) && !isPlayer _x && !(_x in Lifeline_Process) && ((_x distance _incap) < Lifeline_LimitDist) && (currentWeapon _x != secondaryWeapon _x )}); 
 			 Lifeline_medics2choose = (Lifeline_healthy_units select {!(side _x == civilian) && !isPlayer _x && !(_x in Lifeline_Process) && ((_x distance _incap) < Lifeline_LimitDist) 
@@ -458,8 +411,8 @@ Lifeline_PairLoop = {
 
 			 if (count Lifeline_medics2choose > 0 && _closermedic == true) then {
 				if (Lifeline_Revive_debug) then {
-					if (Lifeline_debug_soundalert) then {["closermedic"] remoteExec ["playSound",2]}; 
-					if (Lifeline_hintsilent) then {hintsilent format ["%1  CLOSER MEDIC ", name _medic]}; 
+					if (Lifeline_debug_soundalert && Lifeline_Revive_debug) then {["closermedic"] remoteExec ["playSound",2]}; 
+					if (Lifeline_hintsilent && Lifeline_Revive_debug) then {hintsilent format ["%1  CLOSER MEDIC ", name _medic]}; 
 				 };
 				  _exit = true;
 				  _medic setVariable ["Lifeline_ExitTravel", true, true];
@@ -490,6 +443,7 @@ Lifeline_PairLoop = {
 			|| (((assignedTarget _medic) isKindOf "Tank") && secondaryWeapon _medic != "") //check unit did not get order to hunt tank
 			|| (((getAttackTarget _medic) isKindOf "Tank") && secondaryWeapon _medic != "")			
 			|| _exit == true) then {
+
 				_medic setVariable ["Lifeline_ExitTravel", true, true];
 
 				if (Lifeline_Revive_debug) then {
@@ -531,7 +485,9 @@ Lifeline_PairLoop = {
 				// if (lifestate _medic != "INCAPACITATED") then { //added this conditional. sometimes when medic is hit and downed, this needs to stay as is.			
 						// [_medic,false] remoteExec ["setCaptive",_medic];
 				// }; 
+				_teamcolour = assignedTeam _medic; // joinSilent deletes Teamcolour, so workaround here.
 				[_medic] joinSilent _medic;
+				_medic assignTeam _teamcolour; // joinSilent deletes Teamcolour, so workaround here.
 				_medic = objNull;
 
 		}; // end time > _LifelinePairTimeOut 
@@ -550,6 +506,7 @@ Lifeline_PairLoop = {
 //========================== MAIN REVIVE FUNCTION STARTING MEDIC TRAVEL
 Lifeline_StartRevive = {
 	params ["_medic", "_incap"];
+
 	[_medic,["COURAGE", 1]] remoteExec ["setSkill",0];
 	[_medic,"AUTOTARGET"] remoteExec ["disableAI",0];
 	[_medic,"AUTOCOMBAT"] remoteExec ["disableAI",0];
@@ -571,16 +528,30 @@ Lifeline_StartRevive = {
 	_dir = 0;
 	_revtime = time;
 	_shortorigdist = false;
+	_shortorigdist6 = false;
+	_stance = UnitPos _medic;
 
 	if !(_exit) then {
 		_linenumber = "0757";
 		_exit = [_incap,_medic,"EXIT REVIVE TRAVEL [root]",_linenumber] call Lifeline_exit_travel;
 	};	
 	if (_medic getVariable ["Lifeline_ExitTravel", false] == false && _exit == false) then {
+
 		//if original distance is short, the medic overshoots the incap (goes too far). This var for adjusting anim.
 		if ((_medic distance2D _incap) <= 10) then {
 			_shortorigdist = true;
-			// _medic limitSpeed 5;	
+			// _medic limitSpeed 2;
+			// sleep 4;			
+				if (Lifeline_debug_soundalert && Lifeline_Revive_debug) then {playsound "shortdistance"};
+				if (Lifeline_hintsilent && Lifeline_Revive_debug) then {hint format ["%1 SHORT DISTANCE ", name _medic]};
+		};
+
+		//TEMP NEW
+		if ((_medic distance2D _incap) <= 6)  then {
+			_shortorigdist6 = true;
+			if (stance _medic == "STAND") then {
+				_medic setUnitPos "MIDDLE";
+			};
 		};
 
 		// unassign vehicle if lost group status
@@ -601,13 +572,6 @@ Lifeline_StartRevive = {
 			&& _medic getVariable ["Lifeline_selfheal_progss",false] == false
 		) then {
 			_medic call Lifeline_SelfHeal;
-		};
-
-		//old spot for AI disable
-
-		// remove collision
-		if (alive _incap && alive _medic) then {
-			[_medic, _incap] remoteExecCall ["disableCollisionWith", 0, _medic];
 		};
 
 		// ========== Start travel ===========
@@ -631,10 +595,11 @@ Lifeline_StartRevive = {
 		};
 
 		_revivePos = [_incap, _medic, _distnextto] call Lifeline_POSnexttoincap;	
-		_revivePos set [2,0]; // Set height. Maybe turn this off
+		// _revivePos set [2,0]; // Set height. Maybe turn this off
 		//TEMP // maybe this whole block should move as a waitUntil {_medic distance2D _revivePos < 10} further down this function
 		[_incap,_medic,_revivePos,_EnemyCloseBy] spawn {
 			params ["_incap","_medic","_revivePos","_EnemyCloseBy"];
+
 			// sleep 4;
 			_revivePosCheck = "";
 			_cpr = false;
@@ -644,8 +609,10 @@ Lifeline_StartRevive = {
 			_checkdegrees = 0;
 			_teleptrig = false; //this is to make sure teleport is only triggered once. Teleport is a micro teleport of under 5 metres to make sure medic is in right spot.
 			_telepcheck = nil; // this var is to check medic position against revive position for potential teleport
+
 			while {alive _medic && alive _incap && _medic getVariable ["ReviveInProgress",0] in [1,2] && lifestate _incap == "INCAPACITATED"} do {
 				if (_medic distance2D _revivePos < 10) then { 
+
 					if (Lifeline_RevMethod == 3) then {
 						_cpr = [_medic, _incap] call ace_medical_treatment_fnc_canCPR;
 					};
@@ -655,11 +622,14 @@ Lifeline_StartRevive = {
 						_revivePosCheck = [_incap, _medic, 0.8] call Lifeline_POSnexttoincap; 
 					}; */
 					if (!isnull _EnemyCloseBy && _cpr == false) then {
-						_revivePosCheck = [_incap, _medic, 0.5] call Lifeline_POSnexttoincap;
+							// _revivePosCheck = [_incap, _medic, 0.5] call Lifeline_POSnexttoincap;
+							_revivePosCheck = [_incap, _medic, 0.8] call Lifeline_POSnexttoincap;
 					} else {
 						// _revivePosCheck  = _incap;				
-						_revivePosCheck  = [_incap, _medic, 0.1] call Lifeline_POSnexttoincap;			
+							// _revivePosCheck  = [_incap, _medic, 0.1] call Lifeline_POSnexttoincap;			
+							_revivePosCheck  = [_incap, _medic, 0.5] call Lifeline_POSnexttoincap;			
 					};
+
 					if (Lifeline_Revive_debug && Lifeline_yellowmarker) then {
 
 						//============== MARKERS ======
@@ -668,16 +638,22 @@ Lifeline_StartRevive = {
 						_incap setVariable ["ymarker1", _yelmark, true]; 							
 						//================================
 					};
+
+
 					_telepcheck = _revivePos;
+
+
 					// if (_revivePos isNotEqualTo _revivePosCheck) then {
-					if (_revivePos distance2D _revivePosCheck > 0.2) then {
+					if (_revivePos distance2D _revivePosCheck > 0.2 && _medic distance2D _incap > 4) then {
 					// if (_revivePos distance2D _revivePosCheck > 0.5) then {	
+
 						_revivePos = _revivePosCheck; // commenting out this line, gets diff results. Test/											
 						_incap setVariable ["Lifeline_RevPosX",_revivePos,true];
 
 						if (_medic getVariable ["ReviveInProgress",0] == 1) then {
-							// [_medic] joinSilent _medic;
+							//_teamcolour = assignedTeam _medic;[_medic] joinSilent _medic;_medic assignTeam _teamcolour; // joinSilent deletes Teamcolour, so workaround here.
 							_medic domove position _medic;
+							_medic moveto position _medic;
 							_medic domove _revivePos;
 							_medic moveto _revivePos;
 							if (Lifeline_Revive_debug) then {
@@ -685,14 +661,12 @@ Lifeline_StartRevive = {
 								if (Lifeline_hintsilent) then {hint format ["%1 DOMOVE MEDIC", name _medic]};
 							};
 						};
-						if (Lifeline_yellowmarker) then {
+
+						if (Lifeline_yellowmarker && Lifeline_Revive_debug) then {
 							_incap call Lifeline_delYelMark;
 							_yelmark = createVehicle ["Sign_Arrow_Yellow_F", _revivePos,[],0,"can_collide"];
 							_incap setVariable ["ymarker1", _yelmark, true]; 	
 						};
-						// _direction = _medic getDir _incap;
-						// _direction = _medic getDir _revivePos;
-						// _medic setDir _direction;
 					};
 					// make sure medic is facing right direction. Only for ACE at the moment
 					if (Lifeline_RevMethod == 3) then {
@@ -701,8 +675,8 @@ Lifeline_StartRevive = {
 						if (_medic getVariable ["ReviveInProgress",0] == 2 && _checkdegrees == false && _directioncount > 0) then {
 							// if (_medic getVariable ["ReviveInProgress",0] == 2 && _checkdegrees == false) then {
 							if (Lifeline_Revive_debug) then {
-								if (Lifeline_debug_soundalert) then {playsound "adjust_direction"};
-								if (Lifeline_hintsilent) then {hint format ["%1 DIRECTION MEDIC", name _medic]};
+								if (Lifeline_debug_soundalert) then {playsound "forcedirection"};
+								if (Lifeline_hintsilent) then {hint format ["%1 FORCE DIRECTION", name _medic]};
 							};
 							_direction = _medic getDir _incap;
 							_medic setDir _direction;
@@ -711,9 +685,12 @@ Lifeline_StartRevive = {
 					};
 				}; //if (_medic distance2D _revivePos < 10) then { 
 
+
 				sleep 2;
 				_medicpos2 = getPos _medic;
-			};
+
+			}; // end WHILE
+
 			_incap setVariable ["Lifeline_RevPosX",nil,true];
 			if (Lifeline_Revive_debug && Lifeline_yellowmarker) then {
 				_greenmark = _medic getVariable ["_greenmark1", nil]; 
@@ -747,25 +724,25 @@ Lifeline_StartRevive = {
 
 	_waypoint = [];
 
+
 	if (alive _medic && alive _incap && (lifestate _incap == "INCAPACITATED") && (lifestate _medic != "INCAPACITATED") && _medic getVariable ["Lifeline_ExitTravel", false] == false && _exit == false) then {
 			_revivePos = [_incap, _medic, _distnextto] call Lifeline_POSnexttoincap;	
+			_teamcolour = assignedTeam _medic;// joinSilent deletes Teamcolour, so workaround here.
 
 			// good for getting confused in buildings - confirm later
-			[_medic] joinSilent _medic;
+			[_medic] joinSilent _medic; // THIS AFFECTS SPEED
+			_medic assignTeam _teamcolour;// joinSilent deletes Teamcolour, so workaround here.
+			if (_shortorigdist6) then {
+				_medic limitSpeed 2;
+				// group _medic setSpeedMode "LIMITED";
+				// playsound "testC";
+			};
+
 			//remoteExec version. Even though documentation says doMove and MoveTo is global, was getting errors, so remoteExec seemed to fix it. 
+			[_medic, position _medic] remoteExec ["moveTo", _medic];
 			[_medic, position _medic] remoteExec ["doMove", _medic];
 			[_medic, _revivePos] remoteExec ["moveTo", _medic];
 			[_medic, _revivePos] remoteExec ["doMove", _medic];
-
-
-			// good for getting confused in buildings - confirm later
-			if (_medic distance2D _incap >8) then {
-				for "_i" from 0 to (count waypoints _goup - 1) do {deleteWaypoint [_goup, 0]};
-				group _medic setSpeedMode "NORMAL";
-				_waypoint = (group _medic) addWaypoint [_revivePos, 0];
-				_waypoint setWaypointSpeed "FULL";
-				_waypoint setWaypointType "MOVE";
-			};
 
 			_linenumber = "0868";
 			_exit = [_incap,_medic,"EXIT REVIVE TRAVEL",_linenumber] call Lifeline_exit_travel;
@@ -822,6 +799,9 @@ Lifeline_StartRevive = {
 			_revivePosX = _incap getVariable ["Lifeline_RevPosX",_revivePos];
 			_revivePos = _revivePosX;
 
+
+			// DISTANCE RADIUS <=10 || 	// DISTANCE RADIUS <=15
+
 			// _revivePos = [_incap, _medic, _distnextto] call Lifeline_POSnexttoincap;	
 			waitUntil {
 				sleep 0.1;
@@ -840,6 +820,10 @@ Lifeline_StartRevive = {
 			// _revivePos = [_incap, _medic, _distnextto] call Lifeline_POSnexttoincap;	
 			_revivePosX = _incap getVariable ["Lifeline_RevPosX",_revivePos];
 			_revivePos = _revivePosX;
+
+
+			// DISTANCE RADIUS <=8 || 	// DISTANCE RADIUS <=15
+
 			waitUntil {
 				sleep 0.1;
 				(((_medic distance2D _incap <=8 && speed _medic < 14) || (_medic distance2D _incap <=15 && speed _medic >= 14)) || !alive _medic || !alive _incap || (_incap getvariable ["LifelinePairTimeOut",0] == 0) || lifestate _incap != "INCAPACITATED" || _exit == true  || _shortorigdist == true
@@ -849,6 +833,7 @@ Lifeline_StartRevive = {
 				|| _medic getVariable ["Lifeline_ExitTravel", false] == true		
 				)
 			};
+
 
 			if (lifestate _medic != "INCAPACITATED" && (alive _medic) && lifestate _incap == "INCAPACITATED" && (alive _incap) && (_incap getvariable ["LifelinePairTimeOut",0] != 0)) then {
 				_pairtimebaby = "LifelinePairTimeOut";
@@ -873,6 +858,10 @@ Lifeline_StartRevive = {
 			// some medics were getting stuck waiting for this. Added a timer to unblock.
 			_revivePosX = _incap getVariable ["Lifeline_RevPosX",_revivePos];
 			_revivePos = _revivePosX;
+
+
+			// DISTANCE RADIUS <=6 || 	// DISTANCE RADIUS <=8
+
 			waitUntil {
 				_medic domove _revivePos;
 				sleep 0.7;
@@ -883,6 +872,7 @@ Lifeline_StartRevive = {
 				|| _medic getVariable ["Lifeline_ExitTravel", false] == true
 				) 
 			};			
+
 			// group _medic setspeedMode "FULL";
 
 			if (lifestate _medic != "INCAPACITATED" && (alive _medic) && lifestate _incap == "INCAPACITATED" && (alive _incap) && (_incap getvariable ["LifelinePairTimeOut",0] != 0)) then {
@@ -900,6 +890,7 @@ Lifeline_StartRevive = {
 			_dist = _medic distance _revivePos;
 			_timer = time;
 			_newrevpos = nil; //distance of yellow marker from incap
+			_posture = nil;
 
 			if (!isnull _EnemyCloseBy) then {
 				// commando crawl
@@ -907,13 +898,15 @@ Lifeline_StartRevive = {
 				_animMove = "amovppnemsprslowwrfldf"; // move
 				_animStop = "amovppnemstpsraswrfldnon"; // stop
 				_newrevpos = [_incap, _medic, 0.5] call Lifeline_POSnexttoincap;
+				_posture = "DOWN";
 			} else {
 				// crouch
 				// _revivePos = [_incap, _medic, 0.9] call Lifeline_POSnexttoincap;
 				_animMove = "amovpknlmwlkslowwrfldf"; //"amovpknlmwlkslowwrfldf"; "amovpknlmrunslowwrfldf" "amovpercmrunsraswrfldf"
 				_animStop = "amovpknlmstpslowwrfldnon";
 				// _newrevpos = _incap;
-				_newrevpos = [_incap, _medic, 0.1] call Lifeline_POSnexttoincap;
+				_newrevpos = [_incap, _medic, 0.1] call Lifeline_POSnexttoincap;				
+				_posture = "MIDDLE";
 			};
 
 			// GREEN MARKER BEFORE ANIM CHANGE
@@ -922,12 +915,35 @@ Lifeline_StartRevive = {
 				_medic setVariable ["_greenmark1", _greenmark, true]; 
 			};
 
+
 			//this is vital and must be kept, otherwise anim stands up
 			if (alive _medic && !(lifestate _medic == "INCAPACITATED")) then {
-				_medic disableAI "ANIM"; //TEMP
-				_medic playMoveNow _animMove;
-				// [_medic,_animMove] remoteExec ["playMoveNow",_medic];
-				_medic setdir (_medic getDir _incap);
+				_medic lookAt _newrevpos;
+				// _medic doWatch _newrevpos;
+				_timechc = time;
+				_checkdegrees = [_newrevpos,_medic,15] call Lifeline_checkdegrees;
+				if (_checkdegrees == false) then {				
+					waitUntil {						
+						_medic lookAt _newrevpos;
+						_checkdegrees = [_newrevpos,_medic,30] call Lifeline_checkdegrees;
+						if (time - _timechc > 5) then {
+							_medic lookAt _newrevpos;
+							_medic disableAI "ANIM"; 
+							_medic setDir (_medic getDir _newrevpos);
+							if (Lifeline_debug_soundalert && Lifeline_Revive_debug) then {playsound "forcedirection"};
+							if (Lifeline_hintsilent && Lifeline_Revive_debug) then {hint format ["%1 FORCE DIR MEDIC dist: %2", name _medic, _medic distance2d _newrevpos]};
+						};
+						(_checkdegrees == true)				
+						// (_checkdegrees == true || time - _timechc > 5)				
+					};
+				};
+				if (Lifeline_travel_meth == 0) then {
+					_medic disableAI "ANIM"; //TEMP
+					_medic playMoveNow _animMove;					[_medic,_animMove] remoteExec ["playMoveNow",_medic];
+				};
+				if (Lifeline_travel_meth == 1) then {
+					_medic setUnitPos _posture; //posture
+				};				
 			};
 
 			_rposDist = _revivePos distance2D _incap;
@@ -937,37 +953,45 @@ Lifeline_StartRevive = {
 			if (_exit == true) exitWIth {};			
 			_unblockwtime = time;
 			_selfheal_trig = false; //one time trigger to stop repeated spamming of the check to see if self-revive is active, in the "waitUntil" below
+			_trig1 = false;
+			_diag_texty2 = ""; //only for diag_log
+
 			//check its right direction 
 			// [_medic,_newrevpos] call Lifeline_align_dir;
 
+			// DISTANCE RADIUS <=4
+
 			waitUntil {
-				sleep 0.1;
-				//this unblocks medic stuck and not moving
-				/* if (speed _medic == 0 && _medic getVariable ["Lifeline_selfheal_progss",false] == false && _medic distance2D _newrevpos > 4 && _medic distance2D _newrevpos < 10 && _medic getVariable ["ReviveInProgress",0] == 1) then { 
-					[_medic,_newrevpos] spawn {
-						params ["_medic","_newrevpos"];
-						sleep 3;
+				// sleep 0.1;
+				sleep 0.2;
+				if (speed _medic == 0 && _medic getVariable ["Lifeline_selfheal_progss",false] == false && _medic distance2D _newrevpos > 4 && _medic distance2D _newrevpos < 10 && _medic getVariable ["ReviveInProgress",0] == 1 && _trig1 == false) then { 
+					_trig1 = true;
+					[_incap,_medic,_newrevpos,_animMove] spawn {
+						params ["_incap","_medic","_newrevpos","_animMove"];
+						sleep 2;
 						if (speed _medic == 0 && _medic getVariable ["Lifeline_selfheal_progss",false] == false && _medic distance2D _newrevpos > 4 && _medic distance2D _newrevpos < 10 && _medic getVariable ["ReviveInProgress",0] == 1) then { 
-							if (Lifeline_debug_soundalert) then {playsound "teleportmedic"};
-							if (Lifeline_hintsilent) then {hint format ["%1 TELEPORT MEDIC dist: %2", name _medic, _medic distance2d _newrevpos]};
-							_medic setPos _newrevpos; 
+							// _medic setPos _newrevpos;
+							_medic disableAI "ANIM";
+							_medic setDir (_medic getDir _incap);
+							if (Lifeline_debug_soundalert && Lifeline_Revive_debug) then {playsound "forcedirection"};
+							if (Lifeline_hintsilent && Lifeline_Revive_debug) then {hint format ["%1 FORCE DIR MEDIC dist: %2", name _medic, _medic distance2d _newrevpos]};
+							[_medic,_animMove] remoteExec ["playMoveNow",_medic];
+							_trig1 = false;
 						};
 					};
-				};	 */
+				};
 
-				// if (time - _unblockwtime > 4 && _medic distance2D _newrevpos > 4 && _medic distance2D _newrevpos < 10 && _medic getVariable ["ReviveInProgress",0] == 1) then { 
-					// _medic setPos _newrevpos; 
-				// };
 				if (_medic getVariable ["Lifeline_selfheal_progss",false] == true && _selfheal_trig == false) then {
 					_selfheal_trig = true;
-					[_medic,_newrevpos,_animMove] spawn {
-						params ["_medic","_newrevpos","_animMove"];
+					[_incap,_medic,_newrevpos,_animMove] spawn {
+						params ["_incap","_medic","_newrevpos","_animMove"];
 						waitUntil {
 							(_medic getVariable ["Lifeline_selfheal_progss",false] == false)
 						};
 						// _medic playMoveNow _animMove;
 						[_medic,_animMove] remoteExec ["playMoveNow",_medic];
-						_medic setdir (_medic getDir _newrevpos);						
+						// _medic setdir (_medic getDir _newrevpos);	
+						_medic lookAt _incap;						
 					};
 				};
 
@@ -978,10 +1002,17 @@ Lifeline_StartRevive = {
 				)
 			};	
 
+
 			// GREEN MARKER FOR APPROACH GREETING
 			if (Lifeline_Revive_debug && Lifeline_yellowmarker) then {
 				_greenmark = createVehicle ["Sign_Arrow_green_F", getPos _medic,[],0,"can_collide"];
 				_medic setVariable ["_greenmark2", _greenmark, true]; 
+			};
+
+
+			// remove collision //moved
+			if (alive _incap && alive _medic) then {
+				[_medic, _incap] remoteExecCall ["disableCollisionWith", 0, _medic];
 			};
 
 			// randomized greeting as medic approaches incap
@@ -998,85 +1029,94 @@ Lifeline_StartRevive = {
 					if (lifestate _medic != "INCAPACITATED" && (alive _medic)) then {[_medic, [_voice+"_greetB"+_B, 20, 1, true]] remoteExec ["say3D", 0]};		
 				};
 			};
+
 			//check its right direction 
 			_checkdegrees = [_revivepos,_medic,25] call Lifeline_checkdegrees;
 			if (_checkdegrees == false) then {
 				[_medic,_newrevpos] call Lifeline_align_dir;
-				if (Lifeline_debug_soundalert) then {playsound "adjust_direction"};
-				if (Lifeline_hintsilent) then {hint format ["%1 ADJUST DIRECTION ", name _medic]};
+				if (Lifeline_debug_soundalert && Lifeline_Revive_debug) then {playsound "adjust_direction"};
+				if (Lifeline_hintsilent && Lifeline_Revive_debug) then {hint format ["%1 ADJUST DIRECTION ", name _medic]};
 			};
-/* 			_checkdegrees = [_incap,_medic,15] call Lifeline_checkdegrees;			if (_medic getVariable ["ReviveInProgress",0] == 2 && _checkdegrees == false) then {
-				if (Lifeline_Revive_debug) then {
-					if (Lifeline_debug_soundalert) then {playsound "adjust_direction"};
-					if (Lifeline_hintsilent) then {hint format ["%1 DIRECTION MEDIC", name _medic]};
-				};
-				_direction = _medic getDir _incap;
-				_medic setDir _direction;
-			}; */
+
 			_selfheal_trig = false;			
 			_unblockwtime = time;
+			_trig1 = false;
+			_diag_texty2 = "";
+
+			// DISTANCE RADIUS <=2
 
 			waitUntil {
 				// _medic playMoveNow _animMove;
 				// [_medic,_animMove] remoteExec ["playMoveNow",_medic];
-				_medic doWatch _revivePos;
-				//This is to prevent a medic "stuck" at over 2 metres from incap and not moving. A mini teleport.
-				/* if (speed _medic == 0 && _medic getVariable ["Lifeline_selfheal_progss",false] == false && _medic distance2D _newrevpos > 2 && _medic distance2D _newrevpos < 6 && _medic getVariable ["ReviveInProgress",0] == 1) then { 					
-					[_medic,_newrevpos] spawn {
-						params ["_medic","_newrevpos"];
-						sleep 5;
-						if (speed _medic == 0 && _medic getVariable ["Lifeline_selfheal_progss",false] == false && _medic distance2D _newrevpos > 2 && _medic distance2D _newrevpos < 6 && _medic getVariable ["ReviveInProgress",0] == 1) then { 
-							if (Lifeline_debug_soundalert) then {playsound "teleportmedic"};
-							if (Lifeline_hintsilent) then {hint format ["%1 TELEPORT MEDIC dist: %2", name _medic, _medic distance2d _newrevpos]};
-							_medic setPos _newrevpos;
+				sleep 0.2;
+				_medic doWatch _newrevpos;
+
+				if (speed _medic == 0 && _medic getVariable ["Lifeline_selfheal_progss",false] == false && _medic distance2D _newrevpos > 2 && _medic distance2D _newrevpos < 4 && _medic getVariable ["ReviveInProgress",0] == 1 && _trig1 == false) then { 
+					_trig1 = true;
+					[_incap,_medic,_newrevpos,_animMove] spawn {
+						params ["_incap","_medic","_newrevpos","_animMove"];
+						sleep 2;
+						if (speed _medic == 0 && _medic getVariable ["Lifeline_selfheal_progss",false] == false && _medic distance2D _newrevpos > 2 && _medic distance2D _newrevpos < 4 && _medic getVariable ["ReviveInProgress",0] == 1) then { 
+							// _medic setPos _newrevpos;
+							_medic disableAI "ANIM";
+							_medic setDir (_medic getDir _incap);
+							if (Lifeline_debug_soundalert && Lifeline_Revive_debug) then {playsound "forcedirection"};
+							if (Lifeline_hintsilent && Lifeline_Revive_debug) then {hint format ["%1 FORCE DIR MEDIC dist: %2", name _medic, _medic distance2d _newrevpos]};
+							[_medic,_animMove] remoteExec ["playMoveNow",_medic];
+							_trig1 = false;
 						};
-					};
-				}; */
-				/* if (time - _unblockwtime > 4 && _medic distance2D _newrevpos > 2 && _medic distance2D _newrevpos < 6 && _medic getVariable ["ReviveInProgress",0] == 1) then { 
-					// _medic setPos _newrevpos; 
-					_medic setPos _revivePos; 
-					playsound "siren1";
-				}; */
-				if (_medic getVariable ["Lifeline_selfheal_progss",false] == true && _selfheal_trig == false) then {
-					_selfheal_trig = true;
-					[_medic,_newrevpos,_animMove] spawn {
-						params ["_medic","_newrevpos","_animMove"];
-						waitUntil {
-							(_medic getVariable ["Lifeline_selfheal_progss",false] == false)
-						};
-						// _medic playMoveNow _animMove;
-						[_medic,_animMove] remoteExec ["playMoveNow",_medic];
-						_medic setdir (_medic getDir _newrevpos);													
 					};
 				};
+
 				((_medic distance2D _newrevpos <=2 ) || (!alive _medic) || (!alive _incap) || (lifestate _medic == "INCAPACITATED") || (lifestate _incap != "INCAPACITATED") || (_exit == true) 
 				// || (_incap getVariable ["Lifeline_AssignedMedic",[]]) isEqualTo []
 				|| _medic getVariable ["Lifeline_ExitTravel", false] == true				
 				)
-			};			
+			};	
+
+			if (Lifeline_travel_meth == 1) then {
+				[_medic,_animMove] remoteExec ["playMoveNow",_medic];
+			};
+
+			//TEMP ADD BELOW
+			_medic disableAI "ANIM";
+			_medic setDir (_medic getDir _incap);
+			if (Lifeline_debug_soundalert && Lifeline_Revive_debug) then {playsound "forcedirection"};
+			if (Lifeline_hintsilent && Lifeline_Revive_debug) then {hint format ["%1 FORCE DIR MEDIC dist: %2", name _medic, _medic distance2d _newrevpos]};
+			[_medic,_animMove] remoteExec ["playMoveNow",_medic];
+
 			_unblockwtime = time;
+			_trig1 = false;
+
+			// DISTANCE RADIUS <=1
 
 			waitUntil {
-				// if (speed _medic == 0 && _medic distance2D _newrevpos > 1 && _medic distance2D _newrevpos < 2 && _medic getVariable ["ReviveInProgress",0] == 1) then { 
-				/* if (speed _medic == 0 && _medic getVariable ["Lifeline_selfheal_progss",false] == false && _medic distance2D _newrevpos > 1 && _medic distance2D _newrevpos < 2 && _medic getVariable ["ReviveInProgress",0] == 1) then { 
-					[_medic,_newrevpos] spawn {
-						params ["_medic","_newrevpos"];
-						sleep 3;
+				sleep 0.2;
+
+				if (speed _medic == 0 && _medic getVariable ["Lifeline_selfheal_progss",false] == false && _medic distance2D _newrevpos > 1 && _medic distance2D _newrevpos < 2 && _medic getVariable ["ReviveInProgress",0] == 1 && _trig1 == false) then { 
+					_trig1 = true;
+					[_incap,_medic,_newrevpos,_animMove] spawn {
+						params ["_incap","_medic","_newrevpos","_animMove"];
+						sleep 2;
 						if (speed _medic == 0 && _medic getVariable ["Lifeline_selfheal_progss",false] == false && _medic distance2D _newrevpos > 1 && _medic distance2D _newrevpos < 2 && _medic getVariable ["ReviveInProgress",0] == 1) then { 
-							if (Lifeline_debug_soundalert) then {playsound "teleportmedic"};
-							if (Lifeline_hintsilent) then {hint format ["%1 TELEPORT MEDIC dist: %2", name _medic, _medic distance2d _newrevpos]};
-							_medic setPos _newrevpos;
+							if (Lifeline_debug_soundalert && Lifeline_Revive_debug) then {playsound "forcedirection"};
+							if (Lifeline_hintsilent && Lifeline_Revive_debug) then {hint format ["%1 FORCE DIR MEDIC dist: %2", name _medic, _medic distance2d _newrevpos]};
+							// _medic setPos _newrevpos;
+							_medic disableAI "ANIM";
+							_medic setDir (_medic getDir _incap);
+							[_medic,_animMove] remoteExec ["playMoveNow",_medic];
+							_trig1 = false;
 						};
 					};
-				}; */
+				};
+
 				 // if (time - _unblockwtime > 4 && _medic distance2D _newrevpos > 1 && _medic getVariable ["ReviveInProgress",0] == 1) then { 
 				 if (_medic distance2D _newrevpos > 3 && _medic getVariable ["ReviveInProgress",0] == 1) then { 
-					if (Lifeline_debug_soundalert) then {playsound "teleportmedic"};
-					if (Lifeline_hintsilent) then {hint format ["%1 TELEPORT MEDIC dist: %2", name _medic, _medic distance2d _newrevpos]};
-					_medic setPos _newrevpos;
-					[_medic,_newrevpos] call Lifeline_align_dir;
-					if (Lifeline_debug_soundalert) then {playsound "adjust_direction"};
-					if (Lifeline_hintsilent) then {hint format ["%1 ADJUST DIRECTION ", name _medic]};
+					if (Lifeline_debug_soundalert && Lifeline_Revive_debug) then {playsound "forcedirection"};
+					if (Lifeline_hintsilent && Lifeline_Revive_debug) then {hint format ["%1 FORCE DIRECTION dist: %2", name _medic, _medic distance2d _newrevpos]};
+					_medic setDir (_medic getDir _incap);
+					[_medic,_animMove] remoteExec ["playMoveNow",_medic];
+					[_medic,_animMove] remoteExec ["playMoveNow",_medic];					
 				}; 
 				((_medic distance2D _newrevpos <=1) || (!alive _medic) || (!alive _incap) || (lifestate _medic == "INCAPACITATED") || (lifestate _incap != "INCAPACITATED") || (_exit == true) 
 				// || (_incap getVariable ["Lifeline_AssignedMedic",[]]) isEqualTo []
@@ -1084,13 +1124,12 @@ Lifeline_StartRevive = {
 				)
 			};
 
-			if (alive _medic && !(lifestate _medic == "INCAPACITATED")) then {
-				_medic doWatch _incap;
-				// _medic playMoveNow _animStop;
+
+			// if (alive _medic && !(lifestate _medic == "INCAPACITATED")) then {
+			if (alive _medic && !(lifestate _medic == "INCAPACITATED") && (_exit == false && _medic getVariable ["Lifeline_ExitTravel", false] == false)) then {
+				// _medic doWatch _incap;
+				_medic playMoveNow _animStop;
 				[_medic,_animStop] remoteExec ["playMoveNow",_medic];
-				_inview = [position _medic, getDir _medic, 7, position _incap] call BIS_fnc_inAngleSector;
-				if (!_inview) then {_medic setdir (_medic getDir (position _incap))};
-				_medic doWatch _incap;
 			};
 
 			_linenumber = "1056";
@@ -1114,12 +1153,12 @@ Lifeline_StartRevive = {
 
 	sleep 0.2;
 
-	// _linenumber = "1082";
-	// _exit = [_incap,_medic,"EXIT REVIVE TRAVEL",_linenumber] call Lifeline_exit_travel;
-	// if (_exit == true) exitWIth {};
 
 	if (alive _incap && alive _medic && lifestate _incap == "INCAPACITATED" && lifestate _medic != "INCAPACITATED" && _exit == false && _medic getVariable ["Lifeline_ExitTravel", false] == false ) then {
 
+		// if (Lifeline_travel_meth == 1) then {
+			_medic disableAI "ANIM";
+		// };
 
 		_medic setVariable ["ReviveInProgress",2,true];
 
@@ -1170,7 +1209,7 @@ Lifeline_StartRevive = {
 
 
 	//=====================================================================================================
-	//========= EITHER WAKE UP || BYPASS ==================================================================
+	//========= EITHER WAKE UP OR BYPASS ==================================================================
 	//=====================================================================================================
 
 
@@ -1197,13 +1236,12 @@ Lifeline_StartRevive = {
 		};
 	};
 
-
-	// cancel domove and set speed back to normal
-	if (_medic == leader _medic) then {
-		group _medic setspeedMode "FULL";
-	} else {
-		group _medic setspeedMode "NORMAL";
+	//back to original stance
+	if (Lifeline_travel_meth == 1) then {
+		// _medic setUnitPos _stance;
+		_medic setUnitPos "AUTO";
 	};
+	_medic limitSpeed 100;
 	_medic dofollow leader _medic;
 
 	// Bleedout timer reset
@@ -1217,6 +1255,7 @@ Lifeline_StartRevive = {
 	for "_i" from 0 to (count waypoints _goup - 1) do {deleteWaypoint [_goup, 0]};
 
 	if (lifestate _medic != "INCAPACITATED") then { //added this conditional. if the medic gets downed, then we dont want to reset these
+
 		if !(local _medic) then {
 				[_medic,true] remoteExec ["allowDamage",_medic];
 				[_medic,false] remoteExec ["setCaptive",_medic];
@@ -1244,11 +1283,14 @@ Lifeline_StartRevive = {
 	}; 
 
 	_AssignedMedic = (_incap getVariable ["Lifeline_AssignedMedic",[]]); 
+
 	// if ( !(_medic getVariable ["Lifeline_reset_trig",false]) 
 	if (_incap getVariable ["ReviveInProgress",0] == 3 || _AssignedMedic isEqualTo [] || _medic getVariable ["Lifeline_ExitTravel", false] == true ) then {
 			// _medic setVariable ["Lifeline_reset_trig", true, true]; 
 		 [[_incap,_medic],"1232 VERY END TRAVEL"] call Lifeline_reset2;	
 	};	
+	sleep 5; //delay enableing "ANIM" for 5 secs to stop unit spinning on the ground
+	_medic enableAI "ANIM";
 
 
 }; // End AIReviveUnits Fnc
@@ -1272,6 +1314,7 @@ Lifeline_Map = {
 			_unit setVariable ["Lifeline_IncapMark",_markerName,true];
 		};
 	};
+
 	// Remove marker
 	if (alive _unit && lifestate _unit != "INCAPACITATED") then {
 		if !(_unit getVariable ["Lifeline_IncapMark",""] == "") then {
@@ -1279,6 +1322,7 @@ Lifeline_Map = {
 			_unit setVariable ["Lifeline_IncapMark","",true];
 		};
 	};
+
 	// Add dead marker
 	if (lifeState _unit == "DEAD" || lifeState _unit == "DEAD-RESPAWN" || lifeState _unit == "DEAD-SWITCHING") then {
 		if ((_unit getVariable ["Lifeline_IncapMark",""]) != "Dead") then {
@@ -1319,6 +1363,8 @@ Lifeline_checkdegrees = {
 
 };
 
+
+
 Lifeline_align_dir = {
 params ["_unit","_revivepos"];
 	//check its right direction 
@@ -1327,12 +1373,41 @@ params ["_unit","_revivepos"];
 			if (Lifeline_debug_soundalert) then {playsound "adjust_direction"};
 			if (Lifeline_hintsilent) then {hint format ["%1 DIRECTION MEDIC", name _medic]};
 		};
-		_direction = _medic getDir _revivepos;
-		_medic setDir _direction;
+		// _direction = _medic getDir _revivepos;
+		// _medic setDir _direction;
+		_medic enableAI "ANIM";
+		_medic lookAt _revivepos;
+		_timechk = time;
+		waitUntil {
+			_checkdegrees = [_revivepos,_medic,5] call Lifeline_checkdegrees;
+			(_checkdegrees == true || (time - _timechk) > 5)				
+		};
 	};
 };
 
+//just testing
+reset_idle_medics = {
+    params ["_unit"];
 
+    // Remove all waypoints
+    {
+        deleteWaypoint _x;
+    } forEach waypoints (group _unit);
+
+    // Reset position and direction
+    // _unit setPos (position _unit);
+    _unit setDir (direction _unit);
+	_unit setSkill ["courage", 1];
+    // Reset behaviour
+    _unit setBehaviour "SAFE";
+    _unit setCombatMode "YELLOW";
+    _unit setSpeedMode "LIMITED";
+    _unit disableAI "ALL";
+	sleep 0.1;
+    _unit enableAI "ALL";
+	sleep 0.1;
+	if (Lifeline_Revive_debug) then {[_unit,"IDLE MEDIC reset_idle_medics [Lifeline_Functions.sqf]"] call serverSide_unitstate;};
+};
 
 
 

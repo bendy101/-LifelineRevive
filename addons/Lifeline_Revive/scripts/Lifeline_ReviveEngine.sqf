@@ -77,18 +77,41 @@ if (BI_RespawnDetected in [4,5]) then {
 	  for "_i" from 0 to _cnt do { 
 		_selectedUnit = switchableUnits param [_i,objNull]; 
 		_unit = vehicle _selectedUnit; 
-		if (lifeState _unit == "incapacitated") then { 
+		/* if (lifeState _unit == "incapacitated") then { 
 		  //lbSetText [_idc,_i,"unconscious unit"]; 
 		  //lbSetTooltip [_idc, _i, "unconscious unit"]; 
 		  lbSetColor [_idc, _i,[1,0,0,1]];	// CHANGE COLOR HERE (R,G,B,A) 
+		};  */
+		if (_unit getVariable ["ReviveInProgress",0] == 0 && lifestate _unit == "INCAPACITATED") then {
+			// lbSetColor [_idc, _i,[255,191,167,1]];	// CHANGE COLOR HERE (R,G,B,A) 
+			lbSetColor [_idc, _i,[1,0,0,1]];	// CHANGE COLOR HERE (R,G,B,A) //RED
+		};		
+		if (_unit getVariable ["ReviveInProgress",0] == 3 && lifestate _unit == "INCAPACITATED") then {
+			_medic = (_unit getVariable ["Lifeline_AssignedMedic", []]) select 0;
+			if (_medic getVariable ["ReviveInProgress",0] == 1) then {
+				// lbSetColor [_idc, _i,[0.98, 0.67, 0.23, 1]];	// CHANGE COLOR HERE (R,G,B,A) //ORANGE
+				lbSetColor [_idc, _i,[0.996, 0.48, 0.48, 1]];	// CHANGE COLOR HERE (R,G,B,A) //LIGHT RED
+			};			
+			if (_medic getVariable ["ReviveInProgress",0] == 2) then {
+				lbSetColor [_idc, _i,[0.98, 0.67, 0.23, 1]];	// CHANGE COLOR HERE (R,G,B,A) //ORANGE
+				// lbSetColor [_idc, _i,[0.99, 0.84, 0.63, 1]];	// CHANGE COLOR HERE (R,G,B,A) //LIGHT ORANGE
+			};
+		};
+		if (_unit getVariable ["ReviveInProgress",0] == 1) then {
+		  lbSetColor [_idc, _i,[0.71, 1, 0.34, 1]];	// CHANGE COLOR HERE (R,G,B,A) // LIGHT GREEN
+		}; 		
+		if (_unit getVariable ["ReviveInProgress",0] == 2) then {
+		  // lbSetColor [_idc, _i,[0.39, 1, 0.43, 1]];	// CHANGE COLOR HERE (R,G,B,A) // GREEN
+		  lbSetColor [_idc, _i,[0.13, 0.76, 0.24, 1]];	// CHANGE COLOR HERE (R,G,B,A) // GREEN
 		}; 
 	  }; 
 	  if (_type == 1) then {true}; 
-	  if (lifeState (vehicle (switchableUnits param [_selectedIndex,objNull])) == "incapacitated") then { 
+	  //this turns of the button to switch into unit
+	  /* if (lifeState (vehicle (switchableUnits param [_selectedIndex,objNull])) == "incapacitated") then { 
 		(_displ displayCtrl 1) ctrlShow false 
 	  } else { 
 		(_displ displayCtrl 1) ctrlShow true 
-	  } 
+	  }  */
 	}; 
 
 	[] spawn { 
@@ -137,10 +160,10 @@ if (isServer) then {
 		if (Lifeline_Scope == 1 && !isDedicated) then {Lifeline_All_Units = allunits select {group _x == group player && simulationEnabled _x && rating _x > -2000}};
 
 		// SIDE	
-		if (Lifeline_Scope == 2) then {Lifeline_All_Units = allunits select {(side _x == Lifeline_Side or side _x == civilian) && simulationEnabled _x && rating _x > -2000}};
+		if (Lifeline_Scope == 2) then {Lifeline_All_Units = allunits select {(side (group _x) == Lifeline_Side) && simulationEnabled _x && rating _x > -2000}};
 
 		// ALL PLAYABLE (SLOTS)
-		if (Lifeline_Scope == 3) then {Lifeline_All_Units = allunits select {(side _x == Lifeline_Side or side _x == civilian) && simulationEnabled _x  && (_x in playableUnits) && rating _x > -2000}};
+		if (Lifeline_Scope == 3) then {Lifeline_All_Units = allunits select {(side (group _x) == Lifeline_Side) && simulationEnabled _x  && (_x in playableUnits) && rating _x > -2000}};
 
 		publicVariable "Lifeline_All_Units";
 		waitUntil {count Lifeline_All_Units >0};
@@ -168,10 +191,6 @@ if (isServer) then {
 				//set skill for your AI Units	
 				if (Lifeline_AI_skill > 0) then {
 					_x setSkill Lifeline_AI_skill;
-				};
-				//all units stop command for debugging
-				if (Lifeline_Revive_debug) then {
-					doStop _x;
 				};
 
 				//set Fatigue for all units. Bypass if 0
@@ -254,10 +273,15 @@ if (isServer) then {
 if (isServer) then {
 	[] spawn {
 		while {true} do {
-		_alldown = true;
-		_autorevive = false;
-			{
+			_alldown = true;
+			_autorevive = false;
+			_crouchtrig = false;
+			_incappos = nil;
 
+			{
+				if (Lifeline_Idle_Crouch) then {
+					_crouchtrig = _x getVariable ["Lifeline_crouchtrig",false];
+				};
 				//check if bleeding. both for ACE and non-ACE
 				_isbleeding = false;
 				if (Lifeline_RevMethod == 3) then {
@@ -275,16 +299,6 @@ if (isServer) then {
 					_x spawn Lifeline_SelfHeal;
 				};
 
-				//check if all units are incapacitated or dead for the hint text "MASCAS / MASCAL allunits are down"
-				if (lifestate _x != "INCAPACITATED" && lifestate _x != "DEAD" && lifestate _x != "DEAD-RESPAWN" && lifestate _x != "DEAD-SWITCHING") then {
-					_alldown = false;
-				};	
-				if (lifestate _x == "INCAPACITATED" && (_x getVariable ["Lifeline_autoRecover",false])) then {
-					_autorevive = true;
-					if (isPlayer _x) then {
-						Lifeline_players_autorev pushBackUnique _x;
-					};
-				};	
 
 				// Add Player incap to incap array
 				if (lifeState _x == "INCAPACITATED" &&  !(_x in Lifeline_incapacitated)) then {
@@ -324,7 +338,8 @@ if (isServer) then {
 					if (Debug_overtheshold && lifestate _x != "INCAPACITATED" && alive _x && damage _x > Lifeline_IncapThres && !(_x in Lifeline_incapacitated) && !(_x getVariable ["Lifeline_Down",false])) then {
 						[_x] spawn {
 							params ["_x"];
-							sleep 5;
+							// sleep 5;
+							sleep 3;
 							if (Debug_overtheshold && lifestate _x != "INCAPACITATED" && alive _x && damage _x > Lifeline_IncapThres && !(_x in Lifeline_incapacitated) && !(_x getVariable ["Lifeline_Down",false])) then {
 								_damage = damage _x;
 								diag_log format ["%1 | !!!!!!!!!!!!!! DAMAGE OVER THRESH WITHOUT HANDLER !!!!!!!!!!!!!!!! TOTDMG %2'", name _x, _damage];
@@ -419,8 +434,29 @@ if (isServer) then {
 					[_x] call Lifeline_debug_unit_states;
 				}; 
 
+				// ========================= CROUCH SCRIPT. MAKE UNIT CROUCH WHEN STANDING AND IDLE. MORE IMMERSIVE. (ONLY IN "AWARE" BEHAVIOUR MODE) ============================
+
+				if (Lifeline_Idle_Crouch && _x getVariable ["ReviveInProgress",0] in [0,1]) then {
+					if (speed _x <= Lifeline_Idle_Crouch_Speed && stance _x == "STAND" && _crouchtrig == false && behaviour _x == "AWARE") then {
+						_crouchtrig = true; 
+					   _x setUnitPos "MIDDLE"; 
+					};
+					if ((speed _x > Lifeline_Idle_Crouch_Speed && _crouchtrig == true) || behaviour _x != "AWARE") then {
+						_crouchtrig = false;
+						_x setUnitPos "AUTO";
+					}; 
+					if (speed _x == 0 && _crouchtrig == true && (behaviour _x == "COMBAT" || behaviour _x == "STEALTH" || (isPlayer (leader group _x) && stance (leader group _x) == "PRONE" && behaviour _x == "AWARE"))) then {
+						_crouchtrig = false;
+						_x setUnitPos "DOWN";
+						_x setUnitPos "AUTO";  
+					};
+					 _x setVariable ["Lifeline_crouchtrig",_crouchtrig, true];
+				};	
+
+
 				// ========================= HACK FIX ====================== 
 				// these are hacks to fix variables that sometimes dont get set, due to network errors etc.
+
 				if (Lifeline_Revive_debug == false) then {
 					if (alive _x && lifestate _x == "INCAPACITATED" && captive _x == false && Lifeline_RevProtect != 3) then {
 						if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};
@@ -458,8 +494,35 @@ if (isServer) then {
 							};
 						};
 					};	
-				};
+					// Captive state not staying true when down. 				
+					if (alive _x && lifestate _x == "INCAPACITATED" && captive _x == false && Lifeline_RevProtect != 3) then {
+						[_x] spawn {
+								params ["_x"];
+								sleep 5;
+								if (alive _x && lifestate _x == "INCAPACITATED" && captive _x == false && Lifeline_RevProtect != 3) then {
+									//hackfix here...
+									if (isDedicated) then {
+									 [_x,true] remoteExec ["setCaptive", _x]; 
+									};								
+								};
+						};
+					};	
+				}; // END if (Lifeline_Revive_debug == false) then {
+
 				//========================= END Hack fixes ==================
+
+				//========================== MASCAS =========================	
+
+				//check if all units are incapacitated or dead for the hint text "MASCAS / MASCAL allunits are down"
+				if (lifestate _x != "INCAPACITATED" && lifestate _x != "DEAD" && lifestate _x != "DEAD-RESPAWN" && lifestate _x != "DEAD-SWITCHING") then {
+					_alldown = false;
+				};	
+				if (lifestate _x == "INCAPACITATED" && (_x getVariable ["Lifeline_autoRecover",false])) then {
+					_autorevive = true;
+					if (isPlayer _x) then {
+						Lifeline_players_autorev pushBackUnique _x;
+					};
+				};	
 
 			} foreach Lifeline_All_Units;
 

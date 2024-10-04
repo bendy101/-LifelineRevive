@@ -171,7 +171,9 @@
 				_incap setVariable ["Lifeline_IncapMark","",true];
 			};
 			_goupI = (_incap getVariable ["Lifeline_Grp",(group _incap)]);
+			_teamcolour = assignedTeam _incap;
 			[_incap] joinSilent _goupI;
+			_incap assignTeam _teamcolour;
 			[_incap, (leader _goupI)] remoteExec ["doFollow", _incap];
 			[_incap, false] remoteExec ["setUnconscious",_incap];
 			// Reset bleedout time var
@@ -191,6 +193,8 @@
 			//these vars gotten again to prevent timing issues (such as change of medic during player medic animation
 			_Lifeline_AssignedMedic = _incap getVariable ["Lifeline_AssignedMedic",[]];
 			_Lifeline_AssignedMedic_AI = _Lifeline_AssignedMedic select 0; //this is the other AI medic already on its way. This needs to be cancelled.
+			if (_Lifeline_AssignedMedic_AI isNotEqualTo []) then {
+			};
 			if (_incap getVariable ["ReviveInProgress",0] == 3) then { 
 				[[_incap], format ["%1|%2| PlayerRevive456",name _incap,name _player]] remoteExec ["Lifeline_reset2", _incap];
 			};
@@ -254,9 +258,11 @@
 	//regain control of group.
 	[(group _player), _player] remoteExec ["selectLeader", _player];
 	{
-		if (alive _player && !(lifestate _player == "incapacitated")) then {
+		if (alive _player && !(lifestate _player == "incapacitated")) then {		
 			[(group _player), _player] remoteExec ["selectLeader", _player];
+			_teamcolour = assignedTeam _x; // team colour deleted with JoinSilent. This fixes.
 			[_x] joinSilent group _player;
+			_x assignTeam _teamcolour;		// team colour deleted with JoinSilent. This fixes.
 		};
 	} foreach units group _player;
 

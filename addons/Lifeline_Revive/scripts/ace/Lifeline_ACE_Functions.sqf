@@ -53,6 +53,15 @@ diag_log "======================================================================
 									_unit setVariable ["Lifeline_OrigDir", _dir, true];
 								};
 							};
+						// =========== ADD THE DISTANCE DISPLAY ==============
+						// moved here, start display
+						if ((Lifeline_HUD_distance == true || Lifeline_cntdwn_disply != 0) && isPlayer _unit) then {
+							_seconds = 999;
+							if (lifeState _unit == "INCAPACITATED" && !(_unit getVariable ["Lifeline_countdown_start",false])) then {
+								_unit setVariable ["Lifeline_countdown_start",true,true];
+								[[_unit,_seconds], Lifeline_countdown_timerACE] remoteExec ["spawn",_unit, true];
+							};
+						};
 					};
 			//	};
 			} else {
@@ -1284,11 +1293,51 @@ params ["_unit"];
 		_goup = group _unit;		
 
 		if (_unit != leader _goup && count units group _unit >1 && _unit getVariable ["ReviveInProgress",0] ==0 ) then {
+			_teamcolour = assignedTeam _unit;
 			[_unit] joinSilent (leader _goup);
 			[_unit] joinsilent group _unit;
+			_unit assignTeam _teamcolour;
 		}; 
 
 		sleep 3;		
 	};
 	// _unit setVariable ["Lifeline_selfheal_progss",false,true]; // in original Lifeline_SelfHeal now
 }; // end function
+
+
+Lifeline_countdown_timerACE = {
+	params ["_unit","_seconds"];
+	_counter = _seconds;
+	_colour = "#FFFAF8";	
+	// _font = Lifelinefonts select Lifeline_HUD_dist_font;//added for distance
+
+	while {lifeState _unit == "INCAPACITATED"} do {
+
+		if (_unit getVariable ["Lifeline_canceltimer",false]) exitWith {/*_unit setVariable ["Lifeline_canceltimer",false,true]; */};
+
+
+		//========================= ADDED distance
+		if (Lifeline_HUD_distance) then {
+			_AssignedMedic = (_unit getVariable ["Lifeline_AssignedMedic",[]]); 
+			if (_AssignedMedic isNotEqualTo []) then {
+				_incap = _unit;
+				_medic = _AssignedMedic select 0;
+				_distcalc = _medic distance2D _incap;
+				if (isPlayer _incap && _distcalc > 10) then {
+					// [format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",_font],((safeZoneW - 1) * 0.48),1.26,3,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
+					   [format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",Lifeline_HUD_dist_font],((safeZoneW - 1) * 0.48),1.26,3,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
+					// [format ["<t align='right' size='%3' color='%4' font='%5'>%1    %2m</t><br>..<br>..",name _medic, _distcalc toFixed 0,0.5,"#FFFAF8",_font],((safeZoneW - 1) * 0.48),1.26,5,0,0,LifelineDistLayer] spawn BIS_fnc_dynamicText; //BIS_fnc_dynamicText METHOD
+				};
+				if (isPlayer _incap && (_distcalc <= 10 && _distcalc >= 5 ) && Lifeline_HUD_distance) then {
+					// ["",0.64,1.26,5,0,0,Lifelinetxt1Layer] remoteExec ["BIS_fnc_dynamicText",_incap];
+					["",0.64,1.26,5,0,0,Lifelinetxt1Layer] spawn BIS_fnc_dynamicText;
+					// ["",0.64,1.26,5,0,0,LifelineDistLayer] remoteExec ["BIS_fnc_dynamicText",_incap];
+				};			
+			};	
+		};
+		sleep 1;
+	}; // end while
+
+	// _unit setVariable ["Lifeline_canceltimer",false,true];
+	_unit setVariable ["Lifeline_countdown_start",false,true];
+};

@@ -1,4 +1,4 @@
-Lifeline_Version = "Lifeline Revive AI DEBUG";
+Lifeline_Version = "Lifeline Revive AI";
 diag_log "                                                                                   			               '"; 
 diag_log "============================================================================================================='";
 diag_log "==================================================== MOD ===================================================='";
@@ -61,7 +61,8 @@ if (Lifeline_ACEcheck_ == false) then {
 	// ["Lifeline_CPR_likelihood", "SLIDER",   ["Likelihood of needing CPR",   "If damage over CPR threshold, how likley?\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .9, 0, true],true,{Lifeline_cpr_likelihood = round (Lifeline_cpr_likelihood * 100)}] call CBA_fnc_addSetting;
 	["Lifeline_CPR_likelihood", "SLIDER",   ["Likelihood of Cardiac Arrest w High Damage",   "If damage over CPR threshold, how likley?\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .9, 0, true],true,{Lifeline_cpr_likelihood = round (Lifeline_cpr_likelihood * 100)}] call CBA_fnc_addSetting;
 	["Lifeline_CPR_less_bleedouttime", "SLIDER",   ["Less Bleedout Time when Cardiac Arrest",   "If heart is stopped and need CPR, then bleedout time is compressed to this percentage.\n\n"], ["Lifeline Revive","_MAIN"], [0, 1, .6, 0, true],true,{Lifeline_CPR_less_bleedouttime = round (Lifeline_CPR_less_bleedouttime * 100)}] call CBA_fnc_addSetting;
-	["Lifeline_IncapThres", "SLIDER",   ["Incap Theshold",   "Damage level to trigger incapacitated. Default 0.7\n\n"], "Lifeline Revive Advanced", [0.5, 0.8, 0.7, 1],true,{Lifeline_IncapThres = (round(Lifeline_IncapThres * 10)/10)}] call CBA_fnc_addSetting;
+	["Lifeline_IncapThres", "SLIDER",   ["Incap Threshold",   "Damage level to trigger incapacitated. Default 0.7\n\n"], "Lifeline Revive Advanced", [0.5, 0.8, 0.7, 1],true,{Lifeline_IncapThres = (round(Lifeline_IncapThres * 10)/10)}] call CBA_fnc_addSetting;
+	// ["Lifeline_Idle_Crouch_Speed", "SLIDER",   ["Idle Crouch 'Idle' Threshold",   "For the Idle Crouch, this determinds what speed a unit is moving to be considered 'idle'\n0 for dead still, and 1 to 5 for very slow.\n\n"], "Lifeline Revive Advanced", [0, 5, 0, 0],true,{Lifeline_Idle_Crouch_Speed = round Lifeline_Idle_Crouch_Speed}] call CBA_fnc_addSetting;
 };
 
 // ["Lifeline_medicinvincible", "CHECKBOX", ["Medic Allow Damage During Heal", "When AI comes to assist incapacitated, disable invinciblity"], "Lifeline Revive", true] call CBA_fnc_addSetting;
@@ -93,29 +94,21 @@ Lifeline_RevMethod = 2;
 
 // if (!isNil "oldACE") then {
 if (Lifeline_ACEcheck_ == true) then {
-["Lifeline_ACE_Bandage_Method", "LIST",     ["ACE Bandage method",     "1. Default ACE bandaging.\n2. Less Bandages required.\n\n"], "Lifeline Revive", [[1, 2], ["Default ACE bandaging","Less Bandages required"], 1]] call CBA_fnc_addSetting;
-["Lifeline_ACE_Blackout", "CHECKBOX", ["Disable Unconscious Blackout Screen", "Disable the ACE blackout effect when unconscious\n\n"], "Lifeline Revive", false,true] call CBA_fnc_addSetting;
-
-
-//below are only dummy values to stop "var not found error" when ACE is loaded. Fix this all later with better method.
-Lifeline_BleedOutTime = 9999999;
-Lifeline_InstantDeath = false;
-Lifeline_BandageLimit = 8;
-Lifeline_autoRecover = false;
-Lifeline_RevMethod = 3;
-Lifeline_IncapThres = 0.7;
+	["Lifeline_ACE_Bandage_Method", "LIST",     ["ACE Bandage method",     "1. Default ACE bandaging.\n2. Less Bandages required.\n\n"], "Lifeline Revive", [[1, 2], ["Default ACE bandaging","Less Bandages required"], 1]] call CBA_fnc_addSetting;
+	["Lifeline_ACE_Blackout", "CHECKBOX", ["Disable Unconscious Blackout Screen", "Disable the ACE blackout effect when unconscious\n\n"], "Lifeline Revive", false,true] call CBA_fnc_addSetting;
+	Lifeline_RevMethod = 3;
 };
 
 
 // ["Lifeline_BloodPool", "CHECKBOX", ["Pool of blood", "If this is set to 'false' there is still Vanilla blood or ACE blood effcts.\n\n"], ["Lifeline Revive","VISUAL"], false,true] call CBA_fnc_addSetting;
 // ["Lifeline_Litter", "CHECKBOX", ["Medical litter from the revive", "empty IV bags and discarded packets and bandages\n\n"], ["Lifeline Revive","VISUAL"], false,true] call CBA_fnc_addSetting;
 
-["Lifeline_HUD_distance", "CHECKBOX", ["Distance Hint", "Show distance of medic\n\n"], ["Lifeline Revive","HUD & MAP"], false,true] call CBA_fnc_addSetting;
+["Lifeline_HUD_distance", "CHECKBOX", ["Show Distance of Medic", "Show distance of medic.\nBottom right near bleedout timer.\n\n"], ["Lifeline Revive","HUD & MAP"], false,true] call CBA_fnc_addSetting;
 if (Lifeline_ACEcheck_ == false) then {["Lifeline_cntdwn_disply", "SLIDER",   ["Bleedout Countdown Display",   "When to show countdown display, in seconds left.\ne.g. you could have bleedout set to 300 sec. but the\ncountdown display may only appear at 120 sec.\n0 = off\n\n"], ["Lifeline Revive","HUD & MAP"], [0, 600, 300, 0],true,{Lifeline_cntdwn_disply = round Lifeline_cntdwn_disply}] call CBA_fnc_addSetting};
 
-["Lifeline_HUD_medical", "CHECKBOX", ["Medic Action Hint", "Show which medic action is happening.\ne.g. CPR, blood IV, morphine, body part bandage and number of bandages\n\n"], ["Lifeline Revive","HUD & MAP"], false,true] call CBA_fnc_addSetting;
+["Lifeline_HUD_medical", "CHECKBOX", ["Medical Action Hint", "Show which medical action is happening.\ne.g. CPR, blood IV, morphine, body part bandage and number of bandages\n\n"], ["Lifeline Revive","HUD & MAP"], true,true] call CBA_fnc_addSetting;
 // ["Lifeline_HUD_names", "CHECKBOX", ["HUD list of incapped units and medics", "Just show names of who is being revived\n\n"], ["Lifeline Revive","HUD & MAP"], false,true] call CBA_fnc_addSetting;
-["Lifeline_HUD_names", "LIST",     ["Realtime list of units", 
+["Lifeline_HUD_names", "LIST",     ["List of Incapacitated & Medics", 
 "0. Off
 1. Names
 2. Names, distance & bandage
@@ -135,6 +128,9 @@ This is the timeout left before resetting the medic.  \n\n"], ["Lifeline Revive"
 
 ["Lifeline_Hotwire", "CHECKBOX", ["Hotwire Locked Vehicles with Toolkit", "Vehicles you cannot access can now be unlocked.\nHotwire them with toolkit.\nIf the vehicle is enclosed, then you need to break in first.\nDoes not apply to armoured units.\n\n"], ["Lifeline Revive","~BONUS. Unrelated to revive but useful"], true,true] call CBA_fnc_addSetting;
 ["Lifeline_ExplSpec", "CHECKBOX", ["Make all your units Explosive Specialists", "It is frustrating when you accidently plant a bomb then cannot undo it.\nThis fixes that.\n\n"], ["Lifeline Revive","~BONUS. Unrelated to revive but useful"], true,true] call CBA_fnc_addSetting;
+["Lifeline_Idle_Crouch", "CHECKBOX", ["Idle Crouch", "When a unit is standing and idle, it will temporarily go into a 'crouch'.\nThis only applies to 'aware' behaviour mode.\n\n"], ["Lifeline Revive","~BONUS. Unrelated to revive but useful"], false,true] call CBA_fnc_addSetting;
+["Lifeline_Idle_Crouch_Speed", "SLIDER",   ["Idle Crouch 'Idle' Threshold",   "For the Idle Crouch, this determinds what speed\na unit is moving to be considered 'idle'\n0 for dead still, and 1 to 5 for very slow.\n\n"], ["Lifeline Revive","~BONUS. Unrelated to revive but useful"], [0, 5, 0, 0],true,{Lifeline_Idle_Crouch_Speed = round Lifeline_Idle_Crouch_Speed}] call CBA_fnc_addSetting;
+
 
 // ["Lifeline_HUD_dist_font", "LIST",     ["Font for distance hint",  "Font for distance hint"], ["Lifeline Revive Advanced","DEBUG temporary test"], [[0,1,2,3,4,5,6,7], ["EtelkaMonospacePro","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight"], 0],true] call CBA_fnc_addSetting;
 ["Lifeline_HUD_dist_font", "LIST",     ["Font for distance hint",  "Font for distance hint"], ["Lifeline Revive Advanced","DEBUG temporary test"], [["EtelkaMonospacePro","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight"], ["EtelkaMonospacePro","PuristaBold","PuristaLight","PuristaMedium","PuristaSemibold","RobotoCondensed","RobotoCondensedBold","RobotoCondensedLight"], 0],true] call CBA_fnc_addSetting;
@@ -232,6 +228,8 @@ Lifelinetxt2Layer = "Lifelinetxt2" call BIS_fnc_rscLayer;
 LifelinetxtdebugLayer1 = "Lifelinetxtdebug1" call BIS_fnc_rscLayer; 
 LifelinetxtdebugLayer2 = "Lifelinetxtdebug2" call BIS_fnc_rscLayer; 
 LifelinetxtdebugLayer3 = "Lifelinetxtdebug3" call BIS_fnc_rscLayer; 
+
+Lifeline_travel_meth = 1; //method of revive travel when changing stance to hit ground. 0 = use playnow anim, 1 =  use unit posture (unitPos)
 
 Debug_to = 2; //for debug sound
 // for experimentation
