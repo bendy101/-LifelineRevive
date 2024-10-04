@@ -55,7 +55,7 @@ diag_log "======================================================================
 							};
 						// =========== ADD THE DISTANCE DISPLAY ==============
 						// moved here, start display
-						if ((Lifeline_HUD_distance == true || Lifeline_cntdwn_disply != 0) && isPlayer _unit) then {
+						if ((Lifeline_HUD_distance == true) && isPlayer _unit) then {
 							_seconds = 999;
 							if (lifeState _unit == "INCAPACITATED" && !(_unit getVariable ["Lifeline_countdown_start",false])) then {
 								_unit setVariable ["Lifeline_countdown_start",true,true];
