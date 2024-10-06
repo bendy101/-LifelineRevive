@@ -459,7 +459,7 @@ if (isServer) then {
 
 				if (Lifeline_Revive_debug == false) then {
 					if (alive _x && lifestate _x == "INCAPACITATED" && captive _x == false && Lifeline_RevProtect != 3) then {
-						if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};
+						// if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};
 						// [_x,true] remoteExec ["setCaptive", _x]; 
 						_x setCaptive true; 				
 					};
@@ -472,7 +472,7 @@ if (isServer) then {
 							// if ((isDamageAllowed _x == false || captive _x == true) && alive _x && lifestate _x != "INCAPACITATED" && !(_x getVariable ["Lifeline_Down",false]) && _x getVariable ["ReviveInProgress",0] == 0 && (_x getVariable ["LifelineBleedOutTime",0]) == 0 && !(_x in Lifeline_Process)
 							if ((isDamageAllowed _x == false || captive _x == true) && alive _x && lifestate _x != "INCAPACITATED" && !(_x getVariable ["Lifeline_Down",false]) && _x getVariable ["ReviveInProgress",0] == 0 && !(_x in Lifeline_Process)  // deleted _x getVariable ["LifelineBleedOutTime",0] (unlike line above)
 								&& (isNull findDisplay 60492) && (isNull findDisplay 47) && (isNull findDisplay 48) && (isNull findDisplay 50) && (isNull findDisplay 51) && (isNull findDisplay 58) && (isNull findDisplay 61) && (isNull findDisplay 312) && (isNull findDisplay 314)) then {
-									if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};
+									// if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};
 									if !(local _x) then {
 										[_x, true] remoteExec ["allowDamage",_x];
 										[_x, false] remoteExec ["setCaptive",_x];	
@@ -489,7 +489,7 @@ if (isServer) then {
 							params ["_x"];
 							sleep 7;
 							if (lifestate _x != "INCAPACITATED" && alive _x && (_x getVariable ["LifelineBleedOutTime",0]) != 0 && !(_x in Lifeline_Process) ) then {
-								if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};							
+								// if (Lifeline_debug_soundalert) then {["hackfix"] remoteExec ["playSound",2]};							
 								_x setVariable ["LifelineBleedOutTime",0,true];									
 							};
 						};

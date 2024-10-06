@@ -637,7 +637,7 @@ Lifeline_Medic_Anim_and_Revive = {
 						if (_bandages == 0 ) then {_exit = true;};
 					};
 					if (_exit == true) exitWith {
-						if (Lifeline_debug_soundalert) then {["siren1"] remoteExec ["playSound",2]};
+						// if (Lifeline_debug_soundalert) then {["siren1"] remoteExec ["playSound",2]};
 						hintsilent format ["NO BANDAGE DATA: %1\nEXIT BEFORE BANDAGE ANIM", name _incap];
 					};
 
