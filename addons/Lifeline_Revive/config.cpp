@@ -21,7 +21,7 @@ ReviveMode = 0;
 
 
 class Extended_PreInit_EventHandlers {
-    class My_pre_init_event {
+    class My_pre_init_LifeLine {
         init = "call compile preprocessFileLineNumbers '\Lifeline_Revive\XEH_preInit.sqf'";
     };
 };
@@ -30,7 +30,7 @@ class Extended_PreInit_EventHandlers {
 
 class Extended_PostInit_EventHandlers
 {
-	class My_post_init_event
+	class My_post_init_LifeLine
 	{
 		clientInit="call compile preProcessFileLineNumbers '\Lifeline_Revive\XEH_postInit.sqf'";
 	};
@@ -38,7 +38,7 @@ class Extended_PostInit_EventHandlers
 
 class cfgMods
 {
-	author="Lifeline";
+	author="Bendy";
 	timepacked="1505183013";
 };
 
